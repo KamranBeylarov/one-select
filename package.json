@@ -1,0 +1,41 @@
+{
+  "name": "@kamranbaylarov/one-select",
+  "version": "1.0.1",
+  "description": "A powerful, flexible, and feature-rich multi-select dropdown component for jQuery",
+  "main": "js/one-select.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jquery",
+    "plugin",
+    "select",
+    "multiselect",
+    "dropdown",
+    "checkbox",
+    "ajax",
+    "search"
+  ],
+  "author": "Kamran Baylarov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KamranBeylarov/one-select.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KamranBeylarov/one-select/issues"
+  },
+  "homepage": "https://github.com/KamranBeylarov/one-select#readme",
+  "peerDependencies": {
+    "jquery": ">=1.9.0"
+  },
+  "files": [
+    "js/one-select.js",
+    "js/one-select.min.js",
+    "css/one-select.min.css",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

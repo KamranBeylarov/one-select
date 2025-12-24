@@ -1,5 +1,7 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
+**Version:** 1.0.1 | **Author:** Kamran Baylarov
+
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
 ## 📋 Table of Contents
@@ -77,15 +79,35 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 
 ## 📦 Installation
 
-### 1. Dependencies
+### Via NPM (Recommended)
+
+```bash
+npm install @kamranbaylarov/one-select
+```
+
+### Manual Download
+
+Download from [GitHub Releases](https://github.com/KamranBeylarov/one-select/releases)
+
+### Dependencies
 
 ```html
 <!-- jQuery must be included first -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 ```
 
-### 2. Include Files
+### Include Files
 
+**NPM:**
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="/node_modules/@kamranbaylarov/one-select/css/one-select.min.css">
+
+<!-- JavaScript -->
+<script src="/node_modules/@kamranbaylarov/one-select/js/one-select.min.js"></script>
+```
+
+**Manual:**
 ```html
 <!-- CSS -->
 <link rel="stylesheet" href="/path/to/one-select.min.css">
@@ -94,13 +116,13 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 <script src="/path/to/one-select.js"></script>
 ```
 
-### 3. Create HTML Element
+### Create HTML Element
 
 ```html
 <div id="mySelect"></div>
 ```
 
-### 4. Initialize
+### Initialize
 
 ```javascript
 $('#mySelect').oneSelect({
@@ -810,7 +832,20 @@ $('#select9').oneSelect({
 
 ## 📞 Support
 
-**OneSelect** - jQuery Multi-Select Dropdown Component
+### Links
+
+- **NPM Package:** [@kamranbaylarov/one-select](https://www.npmjs.com/package/@kamranbaylarov/one-select)
+- **GitHub:** [KamranBeylarov/one-select](https://github.com/KamranBeylarov/one-select)
+- **Issues:** [Report issues](https://github.com/KamranBeylarov/one-select/issues)
+
+### Installation
+
+```bash
+# NPM
+npm install @kamranbaylarov/one-select
+
+# CDN (coming soon)
+```
 
 ### Project Structure
 
@@ -819,15 +854,11 @@ one-select/
 ├── css/
 │   └── one-select.min.css
 ├── js/
-│   └── one-select.js
+│   ├── one-select.js
+│   └── one-select.min.js
+├── package.json
 └── README.md
 ```
-
-### File Locations
-
-- **JavaScript:** `one-select/js/one-select.js`
-- **CSS:** `one-select/css/one-select.min.css`
-- **Documentation:** `one-select/README.md`
 
 ### License
 
