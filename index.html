@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OneSelect - jQuery Multi-Select Dropdown - Dokümantasyon ve Demo</title>
+    <link rel="stylesheet" href="css/one-select.min.css">
+    <script src="js/one-select.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: white;
+            color: #333;
+            padding: 40px;
+            text-align: center;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section h2 .icon {
+            font-size: 1.5rem;
+        }
+
+        .section h3 {
+            color: #555;
+            margin: 25px 0 15px 0;
+            font-size: 1.3rem;
+            padding-left: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #f9fafb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .param-table thead {
+            background: #667eea;
+            color: white;
+        }
+
+        .param-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .param-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .param-table tbody tr:hover {
+            background: #f0f4ff;
+        }
+
+        .param-table .type {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .param-table .default {
+            font-family: 'Courier New', monospace;
+            color: #059669;
+        }
+
+        .code-block {
+            background: #1a1a2e;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+            line-height: 1.8;
+        }
+
+        .code-block .comment { color: #6a9955; }
+        .code-block .string { color: #ce9178; }
+        .code-block .number { color: #b5cea8; }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .variable { color: #9cdcfe; }
+
+        .demo-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .demo-box {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .demo-box:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .demo-label {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
+
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; transform: translateY(-2px); }
+
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; transform: translateY(-2px); }
+
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
+
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; transform: translateY(-2px); }
+
+        .external-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            min-height: 60px;
+            border: 3px dashed #667eea;
+            margin: 15px 0;
+        }
+
+        .external-badges:empty::before {
+            content: 'Harici badge-lər burada görünəcək';
+            color: #999;
+            font-style: italic;
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            border-left: 5px solid #0284c7;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-box strong {
+            color: #0369a1;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 5px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-left: 5px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            margin-top: 15px;
+            min-height: 50px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .callback-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .callback-list li {
+            background: #f9fafb;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .callback-list li strong {
+            color: #667eea;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .method-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .method-item {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .method-item strong {
+            color: #667eea;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .feature-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .nav-menu {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            margin: 10px 0;
+        }
+
+        .nav-menu a {
+            display: block;
+            padding: 12px 18px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-menu a:hover {
+            background: #f0f4ff;
+            color: #667eea;
+        }
+
+        .toc {
+            background: #f9fafb;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .toc h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .toc li:last-child {
+            border-bottom: none;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 OneSelect - jQuery Multi-Select Dropdown</h1>
+            <p>jQuery əsaslı güclü, esnek və xüsusiyyətlərlə zəngin multi-seçim komponenti</p>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="section">
+            <h2>📑 İçindəkilər</h2>
+            <div class="toc">
+                <h3>Dokümentasiya Bölmələri</h3>
+                <ul>
+                    <li><a href="#overview">1. Proyektə Ümumi Baxış</a></li>
+                    <li><a href="#installation">2. Quraşdırma və İstifadə</a></li>
+                    <li><a href="#all-parameters">3. Bütün Parametrlər və İzahları</a></li>
+                    <li><a href="#callbacks">4. Callback Metodları</a></li>
+                    <li><a href="#methods">5. Əsas Metodlar</a></li>
+                    <li><a href="#data-attributes">6. Data Attributes</a></li>
+                    <li><a href="#examples">7. Detallı Nümunələr (9 Demo)</a></li>
+                    <li><a href="#ajax">8. AJAX İnteqrasiyası</a></li>
+                    <li><a href="#form-submission">9. Form Göndərmə</a></li>
+                    <li><a href="#badges">10. Badge Sistemi</a></li>
+                    <li><a href="#styling">11. CSS Xüsusiyyətləri</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 1. Overview -->
+        <div class="section" id="overview">
+            <h2><span class="icon">1️⃣</span> Proyektə Ümumi Baxış</h2>
+
+            <div class="feature-card">
+                <h4>🚀 Əsas Xüsusiyyətlər</h4>
+                <p style="margin-top: 10px;">Bu komponent Laravel Blade template sistemi ilə tam inteqrasiya olunmuş, jQuery əsaslı çalışan, çoxsaylı seçim (multi-select) funksionallığını təmin edən güclü bir plugin-dir.</p>
+            </div>
+
+            <h3 style="margin-top: 30px;">💡 Texniki Stack</h3>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li><strong>Framework:</strong> Laravel (Blade Templates)</li>
+                <li><strong>Library:</strong> jQuery (əsas dependency)</li>
+                <li><strong>File:</strong> ailebilling/resources/views/vendor/grid_view/filters/s2.blade.php</li>
+                <li><strong>Demo Folder:</strong> public/select-one/</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">🎯 Əsas Funksionallıq</h3>
+            <div class="grid-3">
+                <div class="demo-box">
+                    <span class="demo-label">✅ Çoxlu Seçim</span>
+                    <p class="note">Checkbox ilə birdə çox element seçə bilərsiniz</p>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">🎨 Badge Sistemi</span>
+                    <p class="note">Seçilmiş elementləri badge kimi göstərə bilərsiniz</p>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">🔄 AJAX Dəstək</span>
+                    <p class="note">Dinamik məlumat yükləmə</p>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">📝 Form Inteqrasiya</span>
+                    <p class="note">Hidden input-lar ilə form göndərmə</p>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">🎛️ Parametrləşdirilən</span>
+                    <p class="note">25+ parametr ilə tam kontrol</p>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">📱 Responsive</span>
+                    <p class="note">Bütün cihazlarda işləyir</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Installation -->
+        <div class="section" id="installation">
+            <h2><span class="icon">2️⃣</span> Quraşdırma və İstifadə</h2>
+
+            <h3>Əsas Quraşdırma</h3>
+            <div class="code-block">
+<span class="comment">&lt;!-- jQuery əvvəlcə include olunmalıdır --&gt;</span>
+&lt;script src="<span class="string">https://code.jquery.com/jquery-3.6.0.min.js</span>"&gt;&lt;/script&gt;
+
+<span class="comment">&lt;!-- Laravel Blade ilə include --&gt;</span>
+@include(<span class="string">'vendor.grid_view.filters.s2'</span>)
+
+<span class="comment">&lt;!-- Və ya birbaşa script tag-i ilə --&gt;</span>
+&lt;script src="<span class="string">/path/to/s2.blade.php</span>"&gt;&lt;/script&gt;
+            </div>
+
+            <h3 style="margin-top: 30px;">Basic İstifadə</h3>
+            <div class="code-block">
+<span class="comment">&lt;!-- HTML elementi --&gt;</span>
+&lt;div id="<span class="variable">mySelect</span>"&gt;&lt;/div&gt;
+
+<span class="comment">&lt;!-- JavaScript ilə inisializasiya --&gt;</span>
+&lt;script&gt;
+$(document).ready(<span class="keyword">function</span>() {
+    $(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>({
+        <span class="string">data</span>: [<span class="string">'Apple'</span>, <span class="string">'Banana'</span>, <span class="string">'Cherry'</span>]
+    });
+});
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <!-- 3. All Parameters -->
+        <div class="section" id="all-parameters">
+            <h2><span class="icon">3️⃣</span> Bütün Parametrlər və İzahları</h2>
+
+            <p style="margin-bottom: 20px;">Bu komponent 25+ parametr ilə konfiqurasiya edilə bilər. Bütün parametrlər JavaScript və ya HTML data attributes vasitəsilə təyin oluna bilər.</p>
+
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Parametr</th>
+                        <th style="width: 15%;">Tip</th>
+                        <th style="width: 15%;">Default</th>
+                        <th style="width: 45%;">İzah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>placeholder</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'Select options...'</td>
+                        <td>Heç nə seçilmədikdə göstəriləcək placeholder mətn</td>
+                    </tr>
+                    <tr>
+                        <td><code>selectAllText</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'Select All'</td>
+                        <td>"Hamısını seç" buttonunun mətni</td>
+                    </tr>
+                    <tr>
+                        <td><code>okText</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'OK'</td>
+                        <td>OK buttonunun mətni</td>
+                    </tr>
+                    <tr>
+                        <td><code>cancelText</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'Cancel'</td>
+                        <td>Cancel buttonunun mətni (seçimləri təmizləyir)</td>
+                    </tr>
+                    <tr>
+                        <td><code>data</code></td>
+                        <td class="type">Array</td>
+                        <td class="default">[]</td>
+                        <td>Seçim optionlarının siyahısı (string və ya object array)</td>
+                    </tr>
+                    <tr>
+                        <td><code>selectedValues</code></td>
+                        <td class="type">Array</td>
+                        <td class="default">[]</td>
+                        <td>Başlanğıcda seçilmiş olacaq dəyərlər</td>
+                    </tr>
+                    <tr>
+                        <td><code>valueField</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'value'</td>
+                        <td>Object array-də value üçün istifadə edilən field adı</td>
+                    </tr>
+                    <tr>
+                        <td><code>labelField</code></td>
+                        <td class="type">String</td>
+                        <td class="default">'label'</td>
+                        <td>Object array-də label üçün istifadə edilən field adı</td>
+                    </tr>
+                    <tr>
+                        <td><code>showCheckbox</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">true</td>
+                        <td>Checkbox-ları göstər/gizlət</td>
+                    </tr>
+                    <tr>
+                        <td><code>showBadges</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">false</td>
+                        <td>Seçilmiş elementləri badge kimi trigger-də göstər</td>
+                    </tr>
+                    <tr>
+                        <td><code>showBadgesExternal</code></td>
+                        <td class="type">String/null</td>
+                        <td class="default">null</td>
+                        <td>Harici element ID-si (badge-ləri orada göstərmək üçün)</td>
+                    </tr>
+                    <tr>
+                        <td><code>closeOnScroll</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">false</td>
+                        <td>Səhifə scroll edəndə dropdown bağlansın</td>
+                    </tr>
+                    <tr>
+                        <td><code>submitForm</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">false</td>
+                        <td>OK button-a klikləndikdə form submit olunsun</td>
+                    </tr>
+                    <tr>
+                        <td><code>submitOnOutside</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">false</td>
+                        <td>Xaricə klikləndikdə form submit olunsun</td>
+                    </tr>
+                    <tr>
+                        <td><code>formId</code></td>
+                        <td class="type">String/null</td>
+                        <td class="default">null</td>
+                        <td>Xüsusi form ID-si (null olarsa parent form tapılır)</td>
+                    </tr>
+                    <tr>
+                        <td><code>name</code></td>
+                        <td class="type">String/null</td>
+                        <td class="default">null</td>
+                        <td>Hidden input-un name attribute-u (form submission üçün)</td>
+                    </tr>
+                    <tr>
+                        <td><code>multiple</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">true</td>
+                        <td>Array formatında submit (name[])</td>
+                    </tr>
+                    <tr>
+                        <td><code>ajax</code></td>
+                        <td class="type">Object/null</td>
+                        <td class="default">null</td>
+                        <td>AJAX konfiqurasiya object-i</td>
+                    </tr>
+                    <tr>
+                        <td><code>autoLoad</code></td>
+                        <td class="type">Boolean</td>
+                        <td class="default">true</td>
+                        <td>Avtomatik AJAX ilə data yüklə</td>
+                    </tr>
+                    <tr>
+                        <td><code>beforeLoad</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>AJAX-dən əvvəl çağrılan callback</td>
+                    </tr>
+                    <tr>
+                        <td><code>afterLoad</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>AJAX uğurla bitdikdə çağrılan callback</td>
+                    </tr>
+                    <tr>
+                        <td><code>onLoadError</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>AJAX xətasında çağrılan callback</td>
+                    </tr>
+                    <tr>
+                        <td><code>onChange</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>Seçim dəyişdikdə çağrılır (values və labels qaytarır)</td>
+                    </tr>
+                    <tr>
+                        <td><code>onSelect</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>onChange-in əvvəlki versiyası (legacy support)</td>
+                    </tr>
+                    <tr>
+                        <td><code>onOk</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>OK button klikləndikdə çağrılır</td>
+                    </tr>
+                    <tr>
+                        <td><code>onCancel</code></td>
+                        <td class="type">Function/null</td>
+                        <td class="default">null</td>
+                        <td>Cancel button klikləndikdə çağrılır</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 4. Callbacks -->
+        <div class="section" id="callbacks">
+            <h2><span class="icon">4️⃣</span> Callback Metodları</h2>
+
+            <p style="margin-bottom: 20px;">Callback-lər hadisələrə reaksiya göstərmək üçün istifadə olunur. Hər callback xüsusi parametrlər qəbul edə bilər.</p>
+
+            <ul class="callback-list">
+                <li>
+                    <strong>onChange(values, labels)</strong>
+                    <p>Seçim hər dəfə dəyişdikdə çağrılır. Ən vacib callback-dir.</p>
+                    <div class="code-block">
+<span class="function">onChange</span>: <span class="keyword">function</span>(<span class="variable">values</span>, <span class="variable">labels</span>) {
+    <span class="comment">// values: ['Apple', 'Cherry'] - seçilmiş dəyərlər</span>
+    <span class="comment">// labels: ['Apple', 'Cherry'] - seçilmiş adlar</span>
+    console.<span class="function">log</span>(<span class="string">'Seçildi:'</span>, labels);
+}
+                    </div>
+                </li>
+
+                <li>
+                    <strong>onOk(values, labels)</strong>
+                    <p>OK button-a klikləndikdə çağrılır.</p>
+                    <div class="code-block">
+<span class="function">onOk</span>: <span class="keyword">function</span>(<span class="variable">values</span>, <span class="variable">labels</span>) {
+    <span class="variable">alert</span>(<span class="string">'Seçilmiş elementlər: '</span> + labels.<span class="function">join</span>(<span class="string">', '</span>));
+}
+                    </div>
+                </li>
+
+                <li>
+                    <strong>onCancel()</strong>
+                    <p>Cancel button-a klikləndikdə çağrılır və bütün seçimləri təmizləyir.</p>
+                    <div class="code-block">
+<span class="function">onCancel</span>: <span class="keyword">function</span>() {
+    console.<span class="function">log</span>(<span class="string">'Seçim ləğv edildi'</span>);
+}
+                    </div>
+                </li>
+
+                <li>
+                    <strong>beforeLoad()</strong>
+                    <p>AJAX sorğu göndərilməmişdən əvvəl çağrılır.</p>
+                    <div class="code-block">
+<span class="function">beforeLoad</span>: <span class="keyword">function</span>() {
+    $(<span class="string">'#loading'</span>).<span class="function">show</span>();
+}
+                    </div>
+                </li>
+
+                <li>
+                    <strong>afterLoad(response)</strong>
+                    <p>AJAX uğurla bitdikdə çağrılır.</p>
+                    <div class="code-block">
+<span class="function">afterLoad</span>: <span class="keyword">function</span>(<span class="variable">response</span>) {
+    $(<span class="string">'#loading'</span>).<span class="function">hide</span>();
+    console.<span class="function">log</span>(<span class="string">'Data yükləndi:'</span>, response);
+}
+                    </div>
+                </li>
+
+                <li>
+                    <strong>onLoadError(error)</strong>
+                    <p>AJAX xətası baş verərsə çağrılır.</p>
+                    <div class="code-block">
+<span class="function">onLoadError</span>: <span class="keyword">function</span>(<span class="variable">error</span>) {
+    <span class="variable">alert</span>(<span class="string">'Xəta: '</span> + error);
+}
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 5. Methods -->
+        <div class="section" id="methods">
+            <h2><span class="icon">5️⃣</span> Əsas Metodlar</h2>
+
+            <div class="method-list">
+                <div class="method-item">
+                    <strong>getValues()</strong>
+                    <p>Seçilmiş dəyərləri array kimi qaytarır</p>
+                    <div class="code-block">
+<span class="keyword">var</span> values = $(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'getValues'</span>);
+<span class="comment">// Result: ['Apple', 'Cherry']</span>
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>getLabels()</strong>
+                    <p>Seçilmiş adları array kimi qaytarır</p>
+                    <div class="code-block">
+<span class="keyword">var</span> labels = $(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'getLabels'</span>);
+<span class="comment">// Result: ['Apple', 'Cherry']</span>
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>select(value)</strong>
+                    <p>Tək element seçir</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'select'</span>, <span class="string">'Apple'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>unselect(value)</strong>
+                    <p>Tək elementin seçimini ləğv edir</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'unselect'</span>, <span class="string">'Apple'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>selectAll()</strong>
+                    <p>Bütün elementləri seçir</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'selectAll'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>unselectAll()</strong>
+                    <p>Bütün seçimləri ləğv edir</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'unselectAll'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>toggleSelection(value)</strong>
+                    <p>Elementin seçimini toggle edir</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'toggleSelection'</span>, <span class="string">'Cherry'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>open()</strong>
+                    <p>Dropdown-u açır</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'open'</span>);
+                    </div>
+                </div>
+
+                <div class="method-item">
+                    <strong>close()</strong>
+                    <p>Dropdown-u bağlayır</p>
+                    <div class="code-block">
+$(<span class="string">'#mySelect'</span>).<span class="function">oneSelect</span>(<span class="string">'close'</span>);
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Data Attributes -->
+        <div class="section" id="data-attributes">
+            <h2><span class="icon">6️⃣</span> HTML Data Attributes</h2>
+
+            <div class="success-box">
+                <strong>💡 Prioritet:</strong> Data Attribute > JS Parametr > Default Dəyər
+            </div>
+
+            <p>Bütün parametrləri HTML data attributes ilə də təyin edə bilərsiniz. Data attributes JS parametrlərindən üstündür.</p>
+
+            <div class="code-block">
+<span class="comment">&lt;!-- Tam konfiqurasiya data attributes ilə --&gt;</span>
+&lt;div id="<span class="variable">mySelect</span>"
+    data-ones-placeholder="<span class="string">Məhsul seçin...</span>"
+    data-ones-select-all-text="<span class="string">Hamısını Seç</span>"
+    data-ones-ok-text="<span class="string">Təsdiq</span>"
+    data-ones-cancel-text="<span class="string">Ləğv et</span>"
+    data-ones-data='<span class="string">["Apple", "Banana", "Cherry"]</span>'
+    data-ones-selected='<span class="string">["Apple"]</span>'
+    data-ones-show-badges="<span class="string">true</span>"
+    data-ones-name="<span class="string">items</span>"
+    data-ones-multiple="<span class="string">true</span>"
+    data-ones-submit-form="<span class="string">true</span>"
+&gt;&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- 7. Examples -->
+        <div class="section" id="examples">
+            <h2><span class="icon">7️⃣</span> Detallı Nümunələr (9 Demo)</h2>
+
+            <h3>Demo 1: Əsas İstifadə</h3>
+            <p class="note">Sadə multi-select ilə predefined data</p>
+
+            <div class="demo-row">
+                <div class="demo-box">
+                    <span class="demo-label">Multi-select</span>
+                    <div id="demo1"></div>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">Nəticə</span>
+                    <div class="output" id="demo1-output">Seçim: yoxdur</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+$(<span class="string">'#demo1'</span>).<span class="function">oneSelect</span>({
+    <span class="string">placeholder</span>: <span class="string">'Meyvə seçin...'</span>,
+    <span class="string">data</span>: [<span class="string">'Alma'</span>, <span class="string">'Banan'</span>, <span class="string">'Alıng'</span>, <span class="string">'Ərik</span>],
+    <span class="function">onChange</span>: <span class="keyword">function</span>(<span class="variable">values</span>, <span class="variable">labels</span>) {
+        $(<span class="string">'#demo1-output'</span>).<span class="function">text</span>(<span class="string">'Seçilən: '</span> + labels.<span class="function">join</span>(<span class="string">', '</span>));
+    }
+});
+            </div>
+
+            <h3>Demo 2: Object Array</h3>
+            <p class="note">Custom field names ilə object array</p>
+
+            <div class="demo-row">
+                <div class="demo-box">
+                    <span class="demo-label">Məhsul (ID və Ad)</span>
+                    <div id="demo2"></div>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">Nəticə</span>
+                    <div class="output" id="demo2-output">Seçilən: yoxdur</div>
+                </div>
+            </div>
+
+            <div class="code-block">
+$(<span class="string">'#demo2'</span>).<span class="function">oneSelect</span>({
+    <span class="string">data</span>: [
+        {<span class="string">id</span>: <span class="number">1</span>, <span class="string">name</span>: <span class="string">'Alma'</span>, <span class="string">category</span>: <span class="string">'Meyvə'</span>},
+        {<span class="string">id</span>: <span class="number">2</span>, <span class="string">name</span>: <span class="string">'Banan'</span>, <span class="string">category</span>: <span class="string">'Meyvə'</span>},
+        {<span class="string">id</span>: <span class="number">3</span>, <span class="string">name</span>: <span class="string">'Pendir</span>, <span class="string">category</span>: <span class="string">'Tərəvəz'</span>}
+    ],
+    <span class="string">valueField</span>: <span class="string">'id'</span>,
+    <span class="string">labelField</span>: <span class="string">'name'</span>
+});
+            </div>
+
+            <h3>Demo 3: Badge Sistemi</h3>
+            <p class="note">Seçilmiş elementləri badge kimi göstər</p>
+
+            <div class="demo-row">
+                <div class="demo-box">
+                    <span class="demo-label">Trigger Badges</span>
+                    <div id="demo3"></div>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">Xarici Badges</span>
+                    <div id="externalBadges" class="external-badges"></div>
+                    <div id="demo4"></div>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="comment">// Trigger-də badge</span>
+$(<span class="string">'#demo3'</span>).<span class="function">oneSelect</span>({
+    <span class="string">data</span>: [<span class="string">'Alma'</span>, <span class="string">'Banan'</span>, <span class="string">'Alıng'</span>],
+    <span class="string">showBadges</span>: <span class="keyword">true</span>
+});
+
+<span class="comment">// Xarici elementdə badge</span>
+$(<span class="string">'#demo4'</span>).<span class="function">oneSelect</span>({
+    <span class="string">data</span>: [<span class="string">'Alma'</span>, <span class="string">'Banan'</span>, <span class="string">'Alıng'</span>],
+    <span class="string">showBadgesExternal</span>: <span class="string">'externalBadges'</span>
+});
+            </div>
+
+            <h3>Demo 4: Form Submission</h3>
+            <p class="note">Backend-ə data göndərmək üçün hidden inputs</p>
+
+            <div class="demo-box">
+                <form id="demoForm">
+                    <span class="demo-label">Form ilə inteqrasiya</span>
+                    <div id="demo5"></div>
+                    <button type="submit" class="btn btn-primary">Formu Göndər (console)</button>
+                </form>
+            </div>
+
+            <div class="output" id="formInputs">
+                Hidden inputs yoxdur
+            </div>
+
+            <h3>Demo 5: Xarici Nəzarət</h3>
+            <p class="note">Proqramlı olaraq kontrol edin</p>
+
+            <div class="demo-row">
+                <div class="demo-box">
+                    <span class="demo-label">Multi-select</span>
+                    <div id="demo6"></div>
+                </div>
+                <div class="demo-box">
+                    <span class="demo-label">Nəzarət Paneli</span>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="controlDemo('selectAll')">Hamısını Seç</button>
+                        <button class="btn btn-secondary" onclick="controlDemo('unselectAll')">Hamısını Ləğv Et</button>
+                        <button class="btn btn-success" onclick="controlDemo('select', 'Alma')">Alma Seç</button>
+                        <button class="btn btn-danger" onclick="controlDemo('unselect', 'Alma')">Alma Ləğv</button>
+                        <button class="btn btn-warning" onclick="controlDemo('open')">Aç</button>
+                        <button class="btn btn-warning" onclick="controlDemo('close')">Bağla</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output" id="demo6-output">
+                Nəzarət üçün hazırdır
+            </div>
+
+            <h3>Demo 6: AJAX İnteqrasiyası</h3>
+            <p class="note">Dinamik data yükləmə (simulyasiya)</p>
+
+            <div class="demo-box">
+                <span class="demo-label">AJAX Multi-select</span>
+                <div id="demo7"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="loadAjaxData()">Data Yüklə (AJAX)</button>
+                <button class="btn btn-secondary" onclick="reloadAjaxData()">Data Yenilə</button>
+            </div>
+
+            <div class="output" id="demo7-output">
+                "Data Yüklə" button-na klikləyin
+            </div>
+
+            <h3>Demo 7: Data Attributes</h3>
+            <p class="note">Yalnız HTML ilə konfiqurasiya</p>
+
+            <div class="code-block">
+<span class="comment">&lt;div id="demo8"</span>
+    data-ones-data='<span class="string">["Qırmızı", "Yaşıl", "Mavi", "Sarı"]</span>'
+    data-ones-placeholder="<span class="string">Rəng seçin...</span>"
+    data-ones-show-badges="<span class="string">true</span>"
+    data-ones-selected='<span class="string">["Qırmızı", "Mavi"]</span>'
+<span class="comment">&gt;&lt;/div&gt;</span>
+            </div>
+
+            <div id="demo8"
+                data-ones-data='["Qırmızı", "Yaşıl", "Mavi", "Sarı"]'
+                data-ones-placeholder="Rəng seçin..."
+                data-ones-show-badges="true"
+                data-ones-selected='["Qırmızı", "Mavi"]'
+            ></div>
+
+            <h3>Demo 8: Çoxlu Instance</h3>
+            <p class="note">Eyni səhifədə müstəqil select-lər</p>
+
+            <div class="grid-3">
+                <div class="demo-box">
+                    <span class="demo-label">🍎 Meyvələr</span>
+                    <div id="fruits"></div>
+                    <button class="btn btn-primary" onclick="controlFruits('selectAll')">Hamısı</button>
+                </div>
+
+                <div class="demo-box">
+                    <span class="demo-label">🎨 Rənglər</span>
+                    <div id="colors"></div>
+                    <button class="btn btn-primary" onclick="controlColors('selectAll')">Hamısı</button>
+                </div>
+
+                <div class="demo-box">
+                    <span class="demo-label">📏 Ölçülər</span>
+                    <div id="sizes"></div>
+                    <button class="btn btn-primary" onclick="controlSizes('selectAll')">Hamısı</button>
+                </div>
+            </div>
+
+            <div class="output" id="multi-output">
+                Meyvələr: yoxdur | Rənglər: yoxdur | Ölçülər: yoxdur
+            </div>
+
+            <h3>Demo 9: Callback-lər</h3>
+            <p class="note">Hadisələrə reaksiya</p>
+
+            <div class="demo-box">
+                <span class="demo-label">Callback Demo</span>
+                <div id="demo9"></div>
+            </div>
+
+            <div class="output" id="demo9-output">
+                Gözləyir...
+            </div>
+        </div>
+
+        <!-- Script -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+        $(document).ready(function() {
+
+            // Demo 1: Basic
+            $('#demo1').oneSelect({
+                placeholder: 'Meyvə seçin...',
+                selectAllText: 'Hamısını Seç',
+                okText: 'OK',
+                cancelText: 'Ləğv et',
+                data: ['Alma', 'Banan', 'Alıng', 'Ərik', 'Narıngı', 'Ərik'],
+                onChange: function(values, labels) {
+                    $('#demo1-output').text('Seçilən: ' + (labels.length ? labels.join(', ') : 'yoxdur'));
+                }
+            });
+
+
+            // Demo 2: Object Array
+            $('#demo2').oneSelect({
+                data: [
+                    { id: 1, name: 'Alma', category: 'Meyvə' },
+                    { id: 2, name: 'Banan', category: 'Meyvə' },
+                    { id: 3, name: 'Pendir', category: 'Tərəvəz' },
+                    { id: 4, name: 'Badımcan', category: 'Tərəvəz' }
+                ],
+                valueField: 'id',
+                labelField: 'name',
+                onChange: function(values, labels) {
+                    $('#demo2-output').text('ID-lər: ' + (values.length ? values.join(', ') : 'yoxdur') + ' | Adlar: ' + (labels.length ? labels.join(', ') : 'yoxdur'));
+                }
+            });
+
+
+            // Demo 3: Badges
+            $('#demo3').oneSelect({
+                data: ['Alma', 'Banan', 'Alıng', 'Ərik'],
+                showBadges: true,
+                placeholder: 'Badge demo'
+            });
+
+            $('#demo4').oneSelect({
+                data: ['Alma', 'Banan', 'Alıng', 'Ərik'],
+                showBadgesExternal: 'externalBadges',
+                placeholder: 'External badge demo'
+            });
+
+
+            // Demo 4: Form
+            $('#demo5').oneSelect({
+                data: ['Element 1', 'Element 2', 'Element 3', 'Element 4', 'Element 5'],
+                name: 'items',
+                multiple: true,
+                onChange: function(values, labels) {
+                    if (values.length === 0) {
+                        $('#formInputs').text('Hidden inputs yoxdur');
+                    } else {
+                        var preview = values.map(function(v) {
+                            return '&lt;input type="hidden" name="items[]" value="' + v + '"&gt;';
+                        }).join('\n');
+                        $('#formInputs').html(preview);
+                    }
+                }
+            });
+
+            $('#demoForm').on('submit', function(e) {
+                e.preventDefault();
+                var values = $('#demo5').oneSelect('getValues');
+                alert('Form göndəriləcək dəyərlər: ' + JSON.stringify(values));
+                console.log('Form submission:', values);
+            });
+
+
+            // Demo 5: External Control
+            var demo6 = $('#demo6').oneSelect({
+                data: ['Alma', 'Banan', 'Alıng', 'Ərik', 'Narıngı', 'Ərik'],
+                placeholder: 'Nəzarət demo',
+                onChange: function(values, labels) {
+                    $('#demo6-output').text('Seçilən: ' + (labels.length ? labels.join(', ') : 'yoxdur'));
+                }
+            });
+
+            window.controlDemo = function(method, value) {
+                switch(method) {
+                    case 'selectAll':
+                        demo6.oneSelect('selectAll');
+                        break;
+                    case 'unselectAll':
+                        demo6.oneSelect('unselectAll');
+                        break;
+                    case 'select':
+                        demo6.oneSelect('select', value);
+                        break;
+                    case 'unselect':
+                        demo6.oneSelect('unselect', value);
+                        break;
+                    case 'open':
+                        demo6.oneSelect('open');
+                        break;
+                    case 'close':
+                        demo6.oneSelect('close');
+                        break;
+                }
+            };
+
+
+            // Demo 6: AJAX
+            var demo7 = $('#demo7').oneSelect({
+                data: [],
+                autoLoad: false,
+                placeholder: 'AJAX demo',
+                beforeLoad: function() {
+                    $('#demo7-output').text('Data yüklənir...');
+                },
+                afterLoad: function(response) {
+                    $('#demo7-output').text('Data yükləndi! ' + response.length + ' element');
+                },
+                onChange: function(values, labels) {
+                    console.log('AJAX demo seçimi:', labels);
+                }
+            });
+
+            window.loadAjaxData = function() {
+                $('#demo7-output').text('AJAX ilə yüklənir...');
+                setTimeout(function() {
+                    var mockData = ['Element A', 'Element B', 'Element C', 'Element D'];
+                    demo7.oneSelect('updateData', mockData);
+                }, 1500);
+            };
+
+            window.reloadAjaxData = function() {
+                $('#demo7-output').text('Data yenilənir...');
+                setTimeout(function() {
+                    var mockData = ['Yeni Element 1', 'Yeni Element 2', 'Yeni Element 3'];
+                    demo7.oneSelect('updateData', mockData);
+                }, 1500);
+            };
+
+
+            // Demo 8: Data Attributes
+            $('#demo8').oneSelect({
+                onChange: function(values, labels) {
+                    console.log('Data attributes demo:', labels);
+                }
+            });
+
+
+            // Demo 9: Multiple Instances
+            var fruits = $('#fruits').oneSelect({
+                data: ['Alma', 'Banan', 'Alıng', 'Ərik', 'Narıngı', 'Ərik', 'Üzüm'],
+                placeholder: 'Meyvə seçin',
+                onChange: updateMultiOutput
+            });
+
+            var colors = $('#colors').oneSelect({
+                data: ['Qırmızı', 'Yaşıl', 'Mavi', 'Sarı', 'Narıncı', 'Bənövşəyi', 'Göy'],
+                placeholder: 'Rəng seçin',
+                onChange: updateMultiOutput
+            });
+
+            var sizes = $('#sizes').oneSelect({
+                data: ['Kiçik', 'Orta', 'Böyük', 'Ekstra Böyük'],
+                placeholder: 'Ölçü seçin',
+                onChange: updateMultiOutput
+            });
+
+            function updateMultiOutput() {
+                var fruitValues = fruits.oneSelect('getValues');
+                var colorValues = colors.oneSelect('getValues');
+                var sizeValues = sizes.oneSelect('getValues');
+                $('#multi-output').text(
+                    'Meyvələr: ' + (fruitValues.length ? fruitValues.join(', ') : 'yoxdur') +
+                    ' | Rənglər: ' + (colorValues.length ? colorValues.join(', ') : 'yoxdur') +
+                    ' | Ölçülər: ' + (sizeValues.length ? sizeValues.join(', ') : 'yoxdur')
+                );
+            }
+
+            window.controlFruits = function(method) {
+                fruits.oneSelect(method);
+            };
+
+            window.controlColors = function(method) {
+                colors.oneSelect(method);
+            };
+
+            window.controlSizes = function(method) {
+                sizes.oneSelect(method);
+            };
+
+
+            // Demo 10: Callbacks
+            $('#demo9').oneSelect({
+                data: ['Seçim A', 'Seçim B', 'Seçim C', 'Seçim D'],
+                showBadges: true,
+                placeholder: 'Callback demo',
+                onChange: function(values, labels) {
+                    $('#demo9-output').html('<strong>onChange:</strong> ' + (labels.length ? labels.join(', ') : 'yoxdur'));
+                },
+                onOk: function(values, labels) {
+                    alert('OK klikləndi!\nSeçilən: ' + (labels.length ? labels.join(', ') : 'yoxdur'));
+                },
+                onCancel: function() {
+                    $('#demo9-output').html('<strong>onCancel:</strong> Seçim ləğv edildi');
+                }
+            });
+
+        });
+        </script>
+    </div>
+</body>
+</html>

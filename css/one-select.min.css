@@ -1,0 +1,37 @@
+.one-select{position:static;display:inline-block}
+.cms-wrapper{position:relative;width:300px;font-family:Arial,sans-serif;z-index:1}
+.cms-wrapper.open{z-index:10000}
+.cms-trigger{width:100%;padding:10px 15px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:42px}
+.cms-trigger:after{content:'▼';font-size:10px;transition:transform .3s}
+.cms-wrapper.open .cms-trigger:after{transform:rotate(180deg)}
+.cms-selected-text{color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-height:42px;overflow-y:auto}
+.cms-selected-text.cms-placeholder{color:#999}
+.cms-selected-text::-webkit-scrollbar{width:4px}
+.cms-selected-text::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+.cms-selected-text::-webkit-scrollbar-track{background:transparent}
+.cms-badge{display:inline-flex;align-items:center;background:#3b82f6;color:#fff;padding:3px 8px;border-radius:12px;font-size:12px;gap:4px}
+.cms-badge-remove{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;cursor:pointer;color:#fff;background:none;border:none;box-shadow:none;padding:0;font-size:14px;line-height:1;border-radius:50%}
+.cms-badge-remove:hover{background:rgba(0,0,0,.1)}
+.cms-dropdown{position:fixed;background:#fff;border:1px solid #ccc;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.15);display:none;z-index:10000;max-height:300px;flex-direction:column;min-width:200px;top:0;left:0}
+.cms-dropdown.open{display:flex}
+.cms-search-wrapper{padding:10px;border-bottom:1px solid #eee;background:#fff;flex-shrink:0}
+.cms-search-input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:4px;font-size:14px;outline:none;transition:border-color .2s}
+.cms-search-input:focus{border-color:#007bff}
+.cms-search-input::placeholder{color:#999}
+.cms-options-container{flex:1;overflow-y:auto;padding:10px 0;min-height:50px;max-height:200px}
+.cms-options-container.cms-loading{opacity:.5;pointer-events:none;position:relative}
+.cms-options-container.cms-loading:after{content:'Loading...';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#999;font-size:14px}
+.cms-option{display:flex;align-items:center;padding:8px 15px;cursor:pointer;transition:background .2s;color:#333}
+.cms-option:hover{background:#f5f5f5}
+.cms-option.select-all{border-bottom:1px solid #eee;font-weight:600;background:#f9f9f9}
+.cms-option.selected label{font-weight:600;color:#007bff}
+.cms-option input[type="checkbox"]{margin:0;margin-right:10px;cursor:pointer;width:16px;height:16px}
+.cms-option.cms-hide-checkbox input[type="checkbox"]{display:none}
+.cms-option.cms-hide-checkbox label{margin-left:0}
+.cms-option label{cursor:pointer;margin:0;user-select:none;flex:1;color:inherit;text-align: left}
+.cms-buttons{display:flex;border-top:1px solid #eee;padding:10px;gap:10px;background:#fff;flex-shrink:0}
+.cms-btn{flex:1;padding:8px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background .2s}
+.cms-btn-ok{background:#007bff;color:#fff}
+.cms-btn-ok:hover{background:#0056b3}
+.cms-btn-cancel{background:#6c757d;color:#fff}
+.cms-btn-cancel:hover{background:#545b62}
