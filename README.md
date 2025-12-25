@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.0.2 | **Author:** Kamran Baylarov
+**Version:** 1.2.0 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -140,11 +140,8 @@ $('#mySelect').oneSelect({
 | `selectAllText` | String | `'Select All'` | "Select All" button text |
 | `okText` | String | `'OK'` | OK button text |
 | `cancelText` | String | `'Cancel'` | Cancel button text |
-| `data` | Array | `[]` | Options list (string or object array) |
-| `selectedValues` | Array | `[]` | Initially selected values |
-| `value` | String/Array/null | `null` | Single or array value - pre-selects items |
-| `valueField` | String | `'value'` | Value field name in object array |
-| `labelField` | String | `'label'` | Label field name in object array |
+| `data` | Array | `[]` | Options list (string array only) |
+| `value` | Number/Array/null | `null` | Single index or array of indices to pre-select |
 | `showCheckbox` | Boolean | `true` | Show/hide checkboxes |
 | `showBadges` | Boolean | `false` | Show badges in trigger |
 | `showBadgesExternal` | String/null | `null` | External element ID (for badges) |
@@ -182,10 +179,7 @@ All parameters can be set via HTML data attributes. Data attributes **override J
 | `data-ones-ok-text` | `okText` | String | `data-ones-ok-text="Confirm"` |
 | `data-ones-cancel-text` | `cancelText` | String | `data-ones-cancel-text="Cancel"` |
 | `data-ones-data` | `data` | Array | `data-ones-data='["A","B","C"]'` |
-| `data-ones-selected` | `selectedValues` | Array | `data-ones-selected='["A","C"]'` |
-| `data-ones-value` | `value` | String/Array | `data-ones-value='"A"'` or `data-ones-value='["A","C"]'` |
-| `data-ones-value-field` | `valueField` | String | `data-ones-value-field="id"` |
-| `data-ones-label-field` | `labelField` | String | `data-ones-label-field="name"` |
+| `data-ones-value` | `value` | Number/Array | `data-ones-value='"0"'` or `data-ones-value='["0","2"]'` |
 | `data-ones-name` | `name` | String | `data-ones-name="items"` |
 | `data-ones-multiple` | `multiple` | Boolean | `data-ones-multiple="true"` |
 | `data-ones-show-checkbox` | `showCheckbox` | Boolean | `data-ones-show-checkbox="false"` |
@@ -342,70 +336,74 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 2. Object Array
+### 2. How It Works
+
+**Data Format:** String array only
 
 ```javascript
-$('#mySelect').oneSelect({
-    data: [
-        { id: 1, name: 'Apple', category: 'Fruit' },
-        { id: 2, name: 'Banana', category: 'Fruit' }
-    ],
-    valueField: 'id',
-    labelField: 'name'
-});
+data: ['Apple', 'Banana', 'Cherry']
 ```
 
-### 3. Key-Value Object (Perfect for PHP associative arrays)
-
-```javascript
-// PHP: ['one' => 'apple', 'two' => 'banana']
-// JavaScript:
-$('#mySelect').oneSelect({
-    data: {
-        one: 'apple',
-        two: 'banana',
-        three: 'cherry'
-    }
-});
-// Result: value = 'one', 'two', 'three' | label = 'apple', 'banana', 'cherry'
-```
+**Result:**
+- **value** (what gets submitted): `0, 1, 2` (array indices)
+- **label** (what user sees): `'Apple', 'Banana', 'Cherry'`
 
 **Perfect for:**
-- PHP associative arrays
-- Key-value pairs
-- Backend codes with readable labels
-- Language translations
+- PHP associative arrays converted to indexed arrays
+- Backend IDs as array indices
+- Display values as array elements
 
-### 4. Value Parameter (Pre-selected Items)
+**Example with PHP data:**
+```php
+// PHP
+$items = [
+    5 => "M.Hadi_9_6/1",
+    6 => "Sarayevo_20_4/2/1",
+    7 => "Sarayevo_13B_3/2/1"
+];
+echo json_encode(array_values($items));
+// Output: ["M.Hadi_9_6/1","Sarayevo_20_4/2/1","Sarayevo_13B_3/2/1"]
+```
 
 ```javascript
-// Single value
+// JavaScript
+$('#mySelect').oneSelect({
+    data: ["M.Hadi_9_6/1", "Sarayevo_20_4/2/1", "Sarayevo_13B_3/2/1"]
+});
+// value: 0, 1, 2 (array indices)
+// label: "M.Hadi_9_6/1", "Sarayevo_20_4/2/1", "Sarayevo_13B_3/2/1"
+```
+
+### 3. Value Parameter (Pre-selected Items)
+
+```javascript
+// Single value (by index)
 $('#mySelect').oneSelect({
     data: ['Apple', 'Banana', 'Cherry', 'Mango'],
-    value: 'Apple'           // 'Apple' will be selected
+    value: 0           // Index 0 ('Apple') will be selected
 });
 
 // Array with multiple selection
 $('#mySelect').oneSelect({
     data: ['Apple', 'Banana', 'Cherry', 'Mango'],
-    value: ['Apple', 'Cherry'],  // Both will be selected
-    showBadges: true            // Enable badge mode
+    value: [0, 2],  // Indices 0 ('Apple') and 2 ('Cherry') will be selected
+    showBadges: true
 });
 
 // HTML data attribute
 <div class="one-select"
     data-ones-data='["Apple", "Banana", "Cherry"]'
-    data-ones-value='"Apple"'>      <!-- Single value -->
+    data-ones-value='"0"'>      <!-- Single index -->
 </div>
 
 <!-- OR -->
 <div class="one-select"
     data-ones-data='["Apple", "Banana", "Cherry"]'
-    data-ones-value='["Apple", "Cherry"]'>  <!-- Array -->
+    data-ones-value='["0", "2"]'>  <!-- Multiple indices -->
 </div>
 ```
 
-### 5. Badge System
+### 4. Badge System
 
 ```javascript
 // Trigger badges
@@ -423,7 +421,7 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 6. Form Submission
+### 5. Form Submission
 
 ```javascript
 $('#mySelect').oneSelect({
@@ -437,11 +435,11 @@ $('#mySelect').oneSelect({
 
 Backend example:
 ```javascript
-// Receive items array: ['Item 1', 'Item 2']
-// Process filtered items
+// Receive items array: [0, 1] (indices of selected items)
+// Use indices to get original values from your data array
 ```
 
-### 7. AJAX Data Loading
+### 6. AJAX Data Loading
 
 ```javascript
 $('#mySelect').oneSelect({
@@ -458,7 +456,7 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 8. Multiple Instances
+### 7. Multiple Instances
 
 ```javascript
 // Each has independent ID
@@ -477,7 +475,7 @@ var fruitsInstance = OneSelect.getInstance(
 fruitsInstance.selectAll();
 ```
 
-### 9. Search Feature
+### 8. Search Feature
 
 ```javascript
 // Enable local search (filters existing data)
@@ -795,26 +793,20 @@ $('#select1').oneSelect({
     data: ['A', 'B', 'C']
 });
 
-// 2. Object array
+// 2. Pre-selected items (by index)
 $('#select2').oneSelect({
-    data: [{id: 1, title: 'A'}, {id: 2, title: 'B'}],
-    valueField: 'id',
-    labelField: 'title'
+    data: ['Apple', 'Banana', 'Cherry'],
+    value: [0, 2]  // Selects indices 0 and 2
 });
 
-// 3. Key-value object (PHP associative arrays)
+// 3. Badges
 $('#select3').oneSelect({
-    data: {en: 'English', tr: 'Turkish', de: 'German'}
-});
-
-// 4. Badges
-$('#select4').oneSelect({
     data: ['X', 'Y', 'Z'],
     showBadges: true
 });
 
-// 5. Form submission
-$('#select5').oneSelect({
+// 4. Form submission
+$('#select4').oneSelect({
     data: ['P1', 'P2'],
     name: 'products',
     multiple: true,
@@ -822,32 +814,26 @@ $('#select5').oneSelect({
     formId: 'myForm'
 });
 
-// 6. AJAX
-$('#select6').oneSelect({
+// 5. AJAX
+$('#select5').oneSelect({
     ajax: {url: '/api/items'},
     autoLoad: false
 });
 
-// 7. Click outside behavior
-$('#select7').oneSelect({
+// 6. Click outside behavior
+$('#select6').oneSelect({
     closeOnOutside: true   // Close when clicking outside (default)
 });
 
-// 8. Pre-selected items
-$('#select8').oneSelect({
-    data: ['Apple', 'Banana', 'Cherry'],
-    value: ['Apple', 'Cherry']  // Pre-select these items
-});
-
-// 9. Search feature (local filtering)
-$('#select9').oneSelect({
+// 7. Search feature (local filtering)
+$('#select7').oneSelect({
     data: ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange'],
     showSearch: true,
     searchPlaceholder: 'Search fruits...'
 });
 
-// 10. AJAX search with debounce
-$('#select10').oneSelect({
+// 8. AJAX search with debounce
+$('#select8').oneSelect({
     showSearch: true,
     searchUrl: '/api/search',
     searchDebounceDelay: 500

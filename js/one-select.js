@@ -87,10 +87,7 @@
         okText: 'OK',
         cancelText: 'Cancel',
         data: [],
-        selectedValues: [],
-        value: null,             // Single value or array of values to pre-select
-        valueField: 'value',
-        labelField: 'label',
+        value: null,             // Single value or array of values to pre-select (index-based)
         showCheckbox: true,
         showBadges: false,
         showBadgesExternal: null,
@@ -133,10 +130,7 @@
                 'ones-ok-text': 'okText',
                 'ones-cancel-text': 'cancelText',
                 'ones-data': 'data',
-                'ones-selected': 'selectedValues',
                 'ones-value': 'value',
-                'ones-value-field': 'valueField',
-                'ones-label-field': 'labelField',
                 'ones-name': 'name',
                 'ones-multiple': 'multiple',
                 'ones-show-checkbox': 'showCheckbox',
@@ -161,7 +155,7 @@
                     return;
                 }
 
-                if (setting === 'data' || setting === 'selectedValues' || setting === 'value') {
+                if (setting === 'data' || setting === 'value') {
                     if (typeof value === 'string') {
                         try {
                             dataOptions[setting] = JSON.parse(value);
@@ -214,8 +208,14 @@
             // Register instance in global registry
             instances[this.instanceId] = this;
 
-            // Merge value parameter into selectedValues
-            this.settings.selectedValues = this.mergeValueSettings(this.settings.value, this.settings.selectedValues);
+            // Convert value to array if needed
+            if (this.settings.value !== null && this.settings.value !== undefined) {
+                if (!Array.isArray(this.settings.value)) {
+                    this.settings.value = [this.settings.value];
+                }
+            } else {
+                this.settings.value = [];
+            }
 
             this.wrapper = this.createWrapper();
             this.trigger = this.createTrigger();
@@ -230,34 +230,6 @@
             if (this.settings.ajax && this.settings.autoLoad) {
                 this.loadData();
             }
-        },
-
-        /**
-         * Merge value parameter into selectedValues array
-         * @param {*} value - Single value or array of values
-         * @param {Array} selectedValues - Existing selected values
-         * @returns {Array} Merged array of selected values
-         */
-        mergeValueSettings: function(value, selectedValues) {
-            var result = selectedValues ? [].concat(selectedValues) : [];
-
-            if (value !== null && value !== undefined) {
-                if (Array.isArray(value)) {
-                    // value is an array - merge all items
-                    $.each(value, function(i, v) {
-                        if ($.inArray(v, result) === -1) {
-                            result.push(v);
-                        }
-                    });
-                } else {
-                    // value is a single value - add if not already present
-                    if ($.inArray(value, result) === -1) {
-                        result.push(value);
-                    }
-                }
-            }
-
-            return result;
         },
 
         build: function() {
@@ -362,25 +334,11 @@
 
             var self = this;
             $.each(this.settings.data, function(index, item) {
-                var value, label;
+                // Always: value = index, label = item
+                var value = index;
+                var label = item;
 
-                if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
-                    // Check if it's an object with valueField/labelField properties
-                    if (self.settings.valueField in item && self.settings.labelField in item) {
-                        value = item[self.settings.valueField];
-                        label = item[self.settings.labelField];
-                    } else {
-                        // Plain object (key-value pair): key -> value, value -> label
-                        value = index;
-                        label = item;
-                    }
-                } else {
-                    // String, number, or other primitive: value = label = item
-                    value = item;
-                    label = item;
-                }
-
-                var isSelected = $.inArray(value, self.settings.selectedValues) !== -1;
+                var isSelected = $.inArray(value, self.settings.value) !== -1;
                 var option = self.createOption(value, label, isSelected);
                 self.optionsContainer.append(option);
             });
@@ -485,26 +443,11 @@
 
             var self = this;
             $.each(data, function(index, item) {
-                var value, label;
+                // Always: value = index, label = item
+                var value = index;
+                var label = item;
 
-                if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
-                    // Check if it's an object with valueField/labelField properties
-                    if (self.settings.valueField in item && self.settings.labelField in item) {
-                        value = item[self.settings.valueField];
-                        label = item[self.settings.labelField];
-                    } else {
-                        // Plain object (key-value pair): key -> value, value -> label
-                        value = index;
-                        label = item;
-                    }
-                } else {
-                    // String, number, or other primitive: value = label = item
-                    value = item;
-                    label = item;
-                }
-
-                // Keep selection state if value was previously selected
-                var isSelected = $.inArray(value, self.settings.selectedValues) !== -1;
+                var isSelected = $.inArray(value, self.settings.value) !== -1;
                 var option = self.createOption(value, label, isSelected);
                 self.optionsContainer.append(option);
             });
@@ -957,7 +900,7 @@
         },
 
         handleCancel: function() {
-            this.settings.selectedValues = [];
+            this.settings.value = [];
             this.optionsContainer.find('input[type="checkbox"]').prop('checked', false);
             this.optionsContainer.find('.cms-option').removeClass('selected');
             this.updateSelectAllState();
@@ -976,7 +919,7 @@
         },
 
         setValue: function(values) {
-            this.settings.selectedValues = values || [];
+            this.settings.value = values || [];
             this.renderOptions();
             this.updateTriggerText();
             this.updateHiddenInputs();
@@ -988,7 +931,7 @@
 
         updateData: function(data) {
             this.settings.data = data || [];
-            this.settings.selectedValues = [];
+            this.settings.value = [];
             this.renderOptions();
             this.updateTriggerText();
             this.updateHiddenInputs();
