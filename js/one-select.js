@@ -364,10 +364,18 @@
             $.each(this.settings.data, function(index, item) {
                 var value, label;
 
-                if (typeof item === 'object') {
-                    value = item[self.settings.valueField];
-                    label = item[self.settings.labelField];
+                if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
+                    // Check if it's an object with valueField/labelField properties
+                    if (self.settings.valueField in item && self.settings.labelField in item) {
+                        value = item[self.settings.valueField];
+                        label = item[self.settings.labelField];
+                    } else {
+                        // Plain object (key-value pair): key -> value, value -> label
+                        value = index;
+                        label = item;
+                    }
                 } else {
+                    // String, number, or other primitive: value = label = item
                     value = item;
                     label = item;
                 }
@@ -479,10 +487,18 @@
             $.each(data, function(index, item) {
                 var value, label;
 
-                if (typeof item === 'object') {
-                    value = item[self.settings.valueField];
-                    label = item[self.settings.labelField];
+                if (typeof item === 'object' && !Array.isArray(item) && item !== null) {
+                    // Check if it's an object with valueField/labelField properties
+                    if (self.settings.valueField in item && self.settings.labelField in item) {
+                        value = item[self.settings.valueField];
+                        label = item[self.settings.labelField];
+                    } else {
+                        // Plain object (key-value pair): key -> value, value -> label
+                        value = index;
+                        label = item;
+                    }
                 } else {
+                    // String, number, or other primitive: value = label = item
                     value = item;
                     label = item;
                 }

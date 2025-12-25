@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.0.1 | **Author:** Kamran Baylarov
+**Version:** 1.0.2 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -355,7 +355,28 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 3. Value Parameter (Pre-selected Items)
+### 3. Key-Value Object (Perfect for PHP associative arrays)
+
+```javascript
+// PHP: ['one' => 'apple', 'two' => 'banana']
+// JavaScript:
+$('#mySelect').oneSelect({
+    data: {
+        one: 'apple',
+        two: 'banana',
+        three: 'cherry'
+    }
+});
+// Result: value = 'one', 'two', 'three' | label = 'apple', 'banana', 'cherry'
+```
+
+**Perfect for:**
+- PHP associative arrays
+- Key-value pairs
+- Backend codes with readable labels
+- Language translations
+
+### 4. Value Parameter (Pre-selected Items)
 
 ```javascript
 // Single value
@@ -384,7 +405,7 @@ $('#mySelect').oneSelect({
 </div>
 ```
 
-### 4. Badge System
+### 5. Badge System
 
 ```javascript
 // Trigger badges
@@ -402,7 +423,7 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 5. Form Submission
+### 6. Form Submission
 
 ```javascript
 $('#mySelect').oneSelect({
@@ -420,7 +441,7 @@ Backend example:
 // Process filtered items
 ```
 
-### 6. AJAX Data Loading
+### 7. AJAX Data Loading
 
 ```javascript
 $('#mySelect').oneSelect({
@@ -437,7 +458,7 @@ $('#mySelect').oneSelect({
 });
 ```
 
-### 7. Multiple Instances
+### 8. Multiple Instances
 
 ```javascript
 // Each has independent ID
@@ -456,7 +477,7 @@ var fruitsInstance = OneSelect.getInstance(
 fruitsInstance.selectAll();
 ```
 
-### 8. Search Feature
+### 9. Search Feature
 
 ```javascript
 // Enable local search (filters existing data)
@@ -781,14 +802,19 @@ $('#select2').oneSelect({
     labelField: 'title'
 });
 
-// 3. Badges
+// 3. Key-value object (PHP associative arrays)
 $('#select3').oneSelect({
+    data: {en: 'English', tr: 'Turkish', de: 'German'}
+});
+
+// 4. Badges
+$('#select4').oneSelect({
     data: ['X', 'Y', 'Z'],
     showBadges: true
 });
 
-// 4. Form submission
-$('#select4').oneSelect({
+// 5. Form submission
+$('#select5').oneSelect({
     data: ['P1', 'P2'],
     name: 'products',
     multiple: true,
@@ -796,32 +822,32 @@ $('#select4').oneSelect({
     formId: 'myForm'
 });
 
-// 5. AJAX
-$('#select5').oneSelect({
+// 6. AJAX
+$('#select6').oneSelect({
     ajax: {url: '/api/items'},
     autoLoad: false
 });
 
-// 6. Click outside behavior
-$('#select6').oneSelect({
+// 7. Click outside behavior
+$('#select7').oneSelect({
     closeOnOutside: true   // Close when clicking outside (default)
 });
 
-// 7. Pre-selected items
-$('#select7').oneSelect({
+// 8. Pre-selected items
+$('#select8').oneSelect({
     data: ['Apple', 'Banana', 'Cherry'],
     value: ['Apple', 'Cherry']  // Pre-select these items
 });
 
-// 8. Search feature (local filtering)
-$('#select8').oneSelect({
+// 9. Search feature (local filtering)
+$('#select9').oneSelect({
     data: ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange'],
     showSearch: true,
     searchPlaceholder: 'Search fruits...'
 });
 
-// 9. AJAX search with debounce
-$('#select9').oneSelect({
+// 10. AJAX search with debounce
+$('#select10').oneSelect({
     showSearch: true,
     searchUrl: '/api/search',
     searchDebounceDelay: 500
