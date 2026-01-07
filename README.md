@@ -40,7 +40,8 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 - 🎪 **Multiple Instances** - Independent selects on same page
 - 🌪 **Click Outside** - Close dropdown when clicking outside (default: true)
 - 📍 **Smart Positioning** - Dropdown positioned with `position: fixed` using viewport coordinates
-- 🔀 **Horizontal Scroll Detection** - Automatically closes on any horizontal scroll to prevent misalignment
+- 🔀 **Horizontal Scroll Detection** - Automatically closes on horizontal scroll (Apple devices: 100px threshold, others: immediate)
+- 🍎 **Cross-Platform** - Smart device detection for Apple touchpad/mouse compatibility
 
 ---
 
@@ -149,7 +150,7 @@ $('#mySelect').oneSelect({
 | `searchPlaceholder` | String | `'Search...'` | Search input placeholder text |
 | `searchUrl` | String/null | `null` | URL for AJAX search (GET request with `q` parameter) |
 | `searchDebounceDelay` | Number | `300` | Delay in milliseconds for search debounce |
-| `closeOnScroll` | Boolean | `false` | Close dropdown on page scroll |
+| `closeOnScroll` | Boolean | `false` | Close dropdown on **vertical** page scroll (horizontal scroll has independent behavior) |
 | `closeOnOutside` | Boolean | `true` | Close dropdown when clicking outside |
 | `submitForm` | Boolean | `false` | Submit form on OK click |
 | `submitOnOutside` | Boolean | `false` | Submit form on outside click |

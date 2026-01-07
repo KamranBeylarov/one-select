@@ -459,6 +459,15 @@
         attachEvents: function() {
             var self = this;
 
+            // Detect Apple device (macOS/iOS)
+            var isAppleDevice = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ||
+                               navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 ||
+                               navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ||
+                               navigator.userAgent.indexOf('Macintosh') !== -1;
+
+            // Set threshold based on device (100px for Apple, 0 for others)
+            var horizontalScrollThreshold = isAppleDevice ? 100 : 0;
+
             this.trigger.on('click', function(e) {
                 e.stopPropagation();
                 self.toggle();
@@ -513,13 +522,14 @@
 
             // Global horizontal scroll handler - close dropdown on any horizontal scroll
             // Listen for wheel events with horizontal delta
+            // This is independent of closeOnScroll setting
             $(document).on('wheel.onescroll', function(e) {
                 if (!self.wrapper.hasClass('open')) {
                     return;
                 }
 
-                // Check if horizontal scrolling (deltaX != 0)
-                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > 0) {
+                // Check if horizontal scrolling (deltaX > threshold)
+                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > horizontalScrollThreshold) {
                     self.close();
                 }
             });
