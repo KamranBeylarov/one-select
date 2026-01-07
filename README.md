@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.2.0 | **Author:** Kamran Baylarov
+**Version:** 1.1.1 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
