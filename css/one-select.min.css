@@ -35,3 +35,7 @@
 .cms-btn-ok:hover{background:#0056b3}
 .cms-btn-cancel{background:#6c757d;color:#fff}
 .cms-btn-cancel:hover{background:#545b62}
+.cms-infinity-preloader{display:none;padding:15px;text-align:center}
+.cms-infinity-preloader.cms-visible{display:block}
+.cms-spinner{width:24px;height:24px;margin:0 auto;border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;animation:cms-spin 1s linear infinite}
+@keyframes cms-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}

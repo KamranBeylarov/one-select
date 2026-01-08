@@ -191,12 +191,13 @@
             var ajaxData = this.$element.data('ones-ajax');
             if (ajaxData) {
                 if (typeof ajaxData === 'string') {
-                    try {
-                        dataOptions.ajax = JSON.parse(ajaxData);
-                    } catch (e) {
-                        console.warn('OneSelect: Invalid JSON for ones-ajax', ajaxData);
-                    }
-                } else {
+                    // String URL olarak kullan, default GET method ile
+                    dataOptions.ajax = {
+                        url: ajaxData,
+                        method: 'GET'
+                    };
+                } else if (typeof ajaxData === 'object') {
+                    // Object olarak kullan (detaylı konfigürasyon için)
                     dataOptions.ajax = ajaxData;
                 }
             }
@@ -333,10 +334,11 @@
             this.optionsContainer.append(selectAllOption);
 
             var self = this;
-            $.each(this.settings.data, function(index, item) {
-                // Always: value = index, label = item
-                var value = index;
-                var label = item;
+            $.each(this.settings.data, function(key, label) {
+                // For object: key = form value, label = display text
+                // For array: key = index, label = item
+                var value = key;
+                var label = label;
 
                 var isSelected = $.inArray(value, self.settings.value) !== -1;
                 var option = self.createOption(value, label, isSelected);
@@ -442,10 +444,11 @@
             this.optionsContainer.find('.cms-option:not([data-value="select-all"])').remove();
 
             var self = this;
-            $.each(data, function(index, item) {
-                // Always: value = index, label = item
-                var value = index;
-                var label = item;
+            $.each(data, function(key, label) {
+                // For object: key = form value, label = display text
+                // For array: key = index, label = item
+                var value = key;
+                var label = label;
 
                 var isSelected = $.inArray(value, self.settings.value) !== -1;
                 var option = self.createOption(value, label, isSelected);
@@ -458,15 +461,6 @@
 
         attachEvents: function() {
             var self = this;
-
-            // Detect Apple device (macOS/iOS)
-            var isAppleDevice = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ||
-                               navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 ||
-                               navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ||
-                               navigator.userAgent.indexOf('Macintosh') !== -1;
-
-            // Set threshold based on device (100px for Apple, 0 for others)
-            var horizontalScrollThreshold = isAppleDevice ? 100 : 0;
 
             this.trigger.on('click', function(e) {
                 e.stopPropagation();
@@ -522,14 +516,13 @@
 
             // Global horizontal scroll handler - close dropdown on any horizontal scroll
             // Listen for wheel events with horizontal delta
-            // This is independent of closeOnScroll setting
             $(document).on('wheel.onescroll', function(e) {
                 if (!self.wrapper.hasClass('open')) {
                     return;
                 }
 
-                // Check if horizontal scrolling (deltaX > threshold)
-                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > horizontalScrollThreshold) {
+                // Check if horizontal scrolling (deltaX != 0)
+                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > 0) {
                     self.close();
                 }
             });

@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.1.1 | **Author:** Kamran Baylarov
+**Version:** 1.2.0 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -40,8 +40,7 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 - 🎪 **Multiple Instances** - Independent selects on same page
 - 🌪 **Click Outside** - Close dropdown when clicking outside (default: true)
 - 📍 **Smart Positioning** - Dropdown positioned with `position: fixed` using viewport coordinates
-- 🔀 **Horizontal Scroll Detection** - Automatically closes on horizontal scroll (Apple devices: 100px threshold, others: immediate)
-- 🍎 **Cross-Platform** - Smart device detection for Apple touchpad/mouse compatibility
+- 🔀 **Horizontal Scroll Detection** - Automatically closes on any horizontal scroll to prevent misalignment
 
 ---
 
@@ -141,8 +140,8 @@ $('#mySelect').oneSelect({
 | `selectAllText` | String | `'Select All'` | "Select All" button text |
 | `okText` | String | `'OK'` | OK button text |
 | `cancelText` | String | `'Cancel'` | Cancel button text |
-| `data` | Array | `[]` | Options list (string array only) |
-| `value` | Number/Array/null | `null` | Single index or array of indices to pre-select |
+| `data` | Array/Object | `[]` | Options list (string array or key-value object) |
+| `value` | Number/Array/String/null | `null` | Single index, key, or array to pre-select |
 | `showCheckbox` | Boolean | `true` | Show/hide checkboxes |
 | `showBadges` | Boolean | `false` | Show badges in trigger |
 | `showBadgesExternal` | String/null | `null` | External element ID (for badges) |
@@ -150,7 +149,7 @@ $('#mySelect').oneSelect({
 | `searchPlaceholder` | String | `'Search...'` | Search input placeholder text |
 | `searchUrl` | String/null | `null` | URL for AJAX search (GET request with `q` parameter) |
 | `searchDebounceDelay` | Number | `300` | Delay in milliseconds for search debounce |
-| `closeOnScroll` | Boolean | `false` | Close dropdown on **vertical** page scroll (horizontal scroll has independent behavior) |
+| `closeOnScroll` | Boolean | `false` | Close dropdown on page scroll |
 | `closeOnOutside` | Boolean | `true` | Close dropdown when clicking outside |
 | `submitForm` | Boolean | `false` | Submit form on OK click |
 | `submitOnOutside` | Boolean | `false` | Submit form on outside click |
@@ -196,7 +195,7 @@ All parameters can be set via HTML data attributes. Data attributes **override J
 | `data-ones-submit-on-outside` | `submitOnOutside` | Boolean | `data-ones-submit-on-outside="true"` |
 | `data-ones-form-id` | `formId` | String | `data-ones-form-id="myForm"` |
 | `data-ones-auto-load` | `autoLoad` | Boolean | `data-ones-auto-load="false"` |
-| `data-ones-ajax` | `ajax` | Object | `data-ones-ajax='{"url": "/api/items"}'` |
+| `data-ones-ajax` | `ajax` | String/Object | `data-ones-ajax="/api/items"` or `data-ones-ajax='{"url": "/api/items","method":"POST"}'` |
 
 ### Example:
 
@@ -339,20 +338,32 @@ $('#mySelect').oneSelect({
 
 ### 2. How It Works
 
-**Data Format:** String array only
+**Data Format:** Now supports both String Array and Key-Value Object
 
+#### Option 1: String Array (original)
 ```javascript
 data: ['Apple', 'Banana', 'Cherry']
 ```
-
 **Result:**
 - **value** (what gets submitted): `0, 1, 2` (array indices)
 - **label** (what user sees): `'Apple', 'Banana', 'Cherry'`
 
+#### Option 2: Key-Value Object (NEW!)
+```javascript
+data: {
+  'fruit_1': 'Apple',
+  'fruit_2': 'Banana',
+  'fruit_3': 'Cherry'
+}
+```
+**Result:**
+- **value** (what gets submitted): `'fruit_1', 'fruit_2', 'fruit_3'` (keys)
+- **label** (what user sees): `'Apple', 'Banana', 'Cherry'` (values)
+
 **Perfect for:**
-- PHP associative arrays converted to indexed arrays
-- Backend IDs as array indices
-- Display values as array elements
+- Database IDs as keys
+- Backend-generated key-value pairs
+- Real-world data structures
 
 **Example with PHP data:**
 ```php
@@ -362,17 +373,48 @@ $items = [
     6 => "Sarayevo_20_4/2/1",
     7 => "Sarayevo_13B_3/2/1"
 ];
-echo json_encode(array_values($items));
-// Output: ["M.Hadi_9_6/1","Sarayevo_20_4/2/1","Sarayevo_13B_3/2/1"]
+echo json_encode($items);
+// Output: {"5":"M.Hadi_9_6/1","6":"Sarayevo_20_4/2/1","7":"Sarayevo_13B_3/2/1"}
 ```
 
 ```javascript
 // JavaScript
 $('#mySelect').oneSelect({
-    data: ["M.Hadi_9_6/1", "Sarayevo_20_4/2/1", "Sarayevo_13B_3/2/1"]
+    data: {"5":"M.Hadi_9_6/1", "6":"Sarayevo_20_4/2/1", "7":"Sarayevo_13B_3/2/1"}
 });
-// value: 0, 1, 2 (array indices)
-// label: "M.Hadi_9_6/1", "Sarayevo_20_4/2/1", "Sarayevo_13B_3/2/1"
+// value: "5", "6", "7" (keys - submitted to form)
+// label: "M.Hadi_9_6/1", "Sarayevo_20_4/2/1", "Sarayevo_13B_3/2/1" (values - displayed to user)
+```
+
+### 2.1. AJAX with Simple URL (NEW!)
+
+**Easy AJAX setup with just URL:**
+
+```javascript
+// Method 1: JavaScript configuration
+$('#mySelect').oneSelect({
+    ajax: {
+        url: '/api/fruits',
+        method: 'GET'  // Default is GET
+    },
+    autoLoad: true
+});
+```
+
+```html
+<!-- Method 2: HTML data attribute (easiest!) -->
+<div id="mySelect" data-ones-ajax="/api/fruits"></div>
+
+<script>
+$('#mySelect').oneSelect();
+</script>
+```
+
+**Advanced AJAX configuration:**
+```html
+<div id="mySelect"
+     data-ones-ajax='{"url":"/api/fruits","method":"POST","data":{"category":"fresh"}}'>
+</div>
 ```
 
 ### 3. Value Parameter (Pre-selected Items)
@@ -800,14 +842,25 @@ $('#select2').oneSelect({
     value: [0, 2]  // Selects indices 0 and 2
 });
 
-// 3. Badges
+// 3. Key-Value Object (NEW!)
 $('#select3').oneSelect({
+    data: {
+        'id_1': 'Apple',
+        'id_2': 'Banana',
+        'id_3': 'Cherry'
+    },
+    value: ['id_1', 'id_3'],  // Selects by keys
+    name: 'fruits'
+});
+
+// 4. Badges
+$('#select4').oneSelect({
     data: ['X', 'Y', 'Z'],
     showBadges: true
 });
 
-// 4. Form submission
-$('#select4').oneSelect({
+// 5. Form submission
+$('#select5').oneSelect({
     data: ['P1', 'P2'],
     name: 'products',
     multiple: true,
@@ -815,26 +868,29 @@ $('#select4').oneSelect({
     formId: 'myForm'
 });
 
-// 5. AJAX
-$('#select5').oneSelect({
+// 6. AJAX with simple URL (NEW!)
+$('#select6').oneSelect({
     ajax: {url: '/api/items'},
-    autoLoad: false
+    autoLoad: true
 });
 
-// 6. Click outside behavior
-$('#select6').oneSelect({
+// OR using data attribute (easiest):
+// <div id="select6" data-ones-ajax="/api/items"></div>
+
+// 7. Click outside behavior
+$('#select7').oneSelect({
     closeOnOutside: true   // Close when clicking outside (default)
 });
 
-// 7. Search feature (local filtering)
-$('#select7').oneSelect({
+// 8. Search feature (local filtering)
+$('#select8').oneSelect({
     data: ['Apple', 'Banana', 'Cherry', 'Mango', 'Orange'],
     showSearch: true,
     searchPlaceholder: 'Search fruits...'
 });
 
-// 8. AJAX search with debounce
-$('#select8').oneSelect({
+// 9. AJAX search with debounce
+$('#select9').oneSelect({
     showSearch: true,
     searchUrl: '/api/search',
     searchDebounceDelay: 500
