@@ -354,7 +354,7 @@
                 var value = key;
                 var label = label;
 
-                var isSelected = $.inArray(value, self.settings.value) !== -1;
+                var isSelected = self.isValueSelected(value);
                 var option = self.createOption(value, label, isSelected);
                 self.optionsContainer.append(option);
             });
@@ -363,12 +363,22 @@
         },
         htmlEncode: function (str) {
             return String(str)
-                .trim()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#39;");
+        },
+
+        isValueSelected: function (value) {
+            if (!this.settings.value) return false;
+            if (Array.isArray(this.settings.value)) {
+                var strValue = String(value).trim();
+                return this.settings.value.some(function (v) {
+                    return String(v).trim() === strValue;
+                });
+            }
+            return String(this.settings.value).trim() === String(value).trim();
         },
         /**
          * Append new options to existing list (for pagination)
@@ -386,7 +396,7 @@
                     return; // Skip if already exists
                 }
 
-                var isSelected = $.inArray(value, self.settings.value) !== -1;
+                var isSelected = self.isValueSelected(value);
                 var option = self.createOption(value, label, isSelected);
                 self.optionsContainer.append(option);
             });
@@ -496,7 +506,7 @@
                 var value = key;
                 var label = label;
 
-                var isSelected = $.inArray(value, self.settings.value) !== -1;
+                var isSelected = self.isValueSelected(value);
                 var option = self.createOption(value, label, isSelected);
                 self.optionsContainer.append(option);
             });
@@ -772,11 +782,25 @@
 
         handleSelectAll: function (checked) {
             var self = this;
+            if (!checked) {
+                // Clear all selection (including hidden ones)
+                if (Array.isArray(this.settings.value)) {
+                    this.settings.value = [];
+                }
+            }
+
             this.optionsContainer.find('.cms-option:not([data-value="select-all"])').each(function () {
                 var option = $(this);
                 option.find('input[type="checkbox"]').prop('checked', checked);
                 if (checked) {
                     option.addClass('selected');
+                    // Add to settings.value if not exists
+                    var val = option.find('input[type="checkbox"]').val();
+                    if (Array.isArray(self.settings.value)) {
+                        if (!self.isValueSelected(val)) {
+                            self.settings.value.push(val);
+                        }
+                    }
                 } else {
                     option.removeClass('selected');
                 }
@@ -833,6 +857,8 @@
         updateTriggerText: function () {
             var labels = this.getSelectedLabels();
             var values = this.getSelectedValues();
+            var totalCount = this.settings.value ? this.settings.value.length : 0;
+
             var textSpan = this.trigger.find('.cms-selected-text');
 
             if (labels.length === 0) {
@@ -857,7 +883,7 @@
                 });
             } else {
                 textSpan.empty().removeClass('cms-placeholder');
-                textSpan.text(labels.length + ' items selected');
+                textSpan.text(totalCount + ' items selected');
             }
 
             this.updateExternalBadges(values, labels);
@@ -1143,6 +1169,13 @@
             if (checkbox.length) {
                 checkbox.prop('checked', true);
                 checkbox.closest('.cms-option').addClass('selected');
+
+                if (Array.isArray(this.settings.value)) {
+                    if (!this.isValueSelected(value)) {
+                        this.settings.value.push(value);
+                    }
+                }
+
                 this.updateSelectAllState();
                 this.updateTriggerText();
                 this.updateHiddenInputs();
@@ -1154,6 +1187,12 @@
             if (checkbox.length) {
                 checkbox.prop('checked', false);
                 checkbox.closest('.cms-option').removeClass('selected');
+
+                if (Array.isArray(this.settings.value)) {
+                    var strValue = String(value).trim();
+                    this.settings.value = this.settings.value.filter(function (v) { return String(v).trim() !== strValue });
+                }
+
                 this.updateSelectAllState();
                 this.updateTriggerText();
                 this.updateHiddenInputs();
@@ -1177,8 +1216,17 @@
                 var option = checkbox.closest('.cms-option');
                 if (!isChecked) {
                     option.addClass('selected');
+                    if (Array.isArray(this.settings.value)) {
+                        if (!this.isValueSelected(value)) {
+                            this.settings.value.push(value);
+                        }
+                    }
                 } else {
                     option.removeClass('selected');
+                    if (Array.isArray(this.settings.value)) {
+                        var strValue = String(value).trim();
+                        this.settings.value = this.settings.value.filter(function (v) { return String(v).trim() !== strValue });
+                    }
                 }
 
                 this.updateSelectAllState();
