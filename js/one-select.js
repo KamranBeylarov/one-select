@@ -9,7 +9,7 @@
  * A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
  */
 
-(function(factory) {
+(function (factory) {
     'use strict';
 
     if (typeof define === 'function' && define.amd) {
@@ -17,7 +17,7 @@
         define(['jquery'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // CommonJS
-        module.exports = function(root, jQuery) {
+        module.exports = function (root, jQuery) {
             if (jQuery === undefined) {
                 if (typeof window !== 'undefined') {
                     jQuery = require('jquery');
@@ -33,7 +33,7 @@
         factory(window.jQuery || window.$);
     }
 
-}(function($) {
+}(function ($) {
     'use strict';
 
     // Global registry for all instances
@@ -48,11 +48,11 @@
      */
     function debounce(func, delay) {
         var timeoutId;
-        return function() {
+        return function () {
             var context = this;
             var args = arguments;
             clearTimeout(timeoutId);
-            timeoutId = setTimeout(function() {
+            timeoutId = setTimeout(function () {
                 func.apply(context, args);
             }, delay);
         };
@@ -63,7 +63,7 @@
      * @param {HTMLElement} element - The DOM element
      * @param {Object} options - Configuration options
      */
-    var OneSelect = function(element, options) {
+    var OneSelect = function (element, options) {
         this.element = element;
         this.$element = $(element);
 
@@ -110,7 +110,10 @@
         onChange: null,
         onSelect: null,
         onOk: null,
-        onCancel: null
+        onCancel: null,
+        infinityScroll: false,
+        onInfinityScroll: null,
+        loading: false
     };
 
     /**
@@ -120,7 +123,7 @@
         /**
          * Read data attributes from HTML element
          */
-        readDataAttributes: function() {
+        readDataAttributes: function () {
             var self = this;
             var dataOptions = {};
 
@@ -145,10 +148,11 @@
                 'ones-submit-form': 'submitForm',
                 'ones-submit-on-outside': 'submitOnOutside',
                 'ones-form-id': 'formId',
-                'ones-auto-load': 'autoLoad'
+                'ones-auto-load': 'autoLoad',
+                'ones-infinity-scroll': 'infinityScroll'
             };
 
-            $.each(attributeMap, function(attr, setting) {
+            $.each(attributeMap, function (attr, setting) {
                 var value = self.$element.data(attr);
 
                 if (value === undefined) {
@@ -167,10 +171,10 @@
                         dataOptions[setting] = value;
                     }
                 } else if (setting === 'multiple' || setting === 'showCheckbox' ||
-                           setting === 'showBadges' || setting === 'showSearch' ||
-                           setting === 'closeOnScroll' || setting === 'closeOnOutside' ||
-                           setting === 'submitForm' || setting === 'submitOnOutside' ||
-                           setting === 'autoLoad') {
+                    setting === 'showBadges' || setting === 'showSearch' ||
+                    setting === 'closeOnScroll' || setting === 'closeOnOutside' ||
+                    setting === 'submitForm' || setting === 'submitOnOutside' ||
+                    setting === 'autoLoad' || setting === 'infinityScroll') {
                     if (typeof value === 'string') {
                         dataOptions[setting] = value === 'true' || value === '1';
                     } else {
@@ -205,7 +209,7 @@
             return dataOptions;
         },
 
-        init: function() {
+        init: function () {
             // Register instance in global registry
             instances[this.instanceId] = this;
 
@@ -218,11 +222,16 @@
                 this.settings.value = [];
             }
 
+            // Initialize pagination state for infinity scroll
+            this.currentPage = 1;
+            this.hasNextPage = false;
+
             this.wrapper = this.createWrapper();
             this.trigger = this.createTrigger();
             this.dropdown = this.createDropdown();
             this.searchInput = this.createSearchInput();
             this.optionsContainer = this.createOptionsContainer();
+            this.preloader = this.createPreloader();
             this.buttons = this.createButtons();
 
             this.build();
@@ -233,12 +242,13 @@
             }
         },
 
-        build: function() {
+        build: function () {
             // Add search input at the top of dropdown if enabled
             if (this.settings.showSearch) {
                 this.dropdown.append(this.searchInput);
             }
             this.dropdown.append(this.optionsContainer);
+            this.dropdown.append(this.preloader);
             this.dropdown.append(this.buttons);
             this.wrapper.append(this.trigger);
 
@@ -251,7 +261,7 @@
             this.updateHiddenInputs();
         },
 
-        updateHiddenInputs: function() {
+        updateHiddenInputs: function () {
             if (!this.settings.name) {
                 return;
             }
@@ -275,7 +285,7 @@
             var selectedValues = this.getSelectedValues();
 
             if (this.settings.multiple) {
-                $.each(selectedValues, function(index, value) {
+                $.each(selectedValues, function (index, value) {
                     var hiddenInput = $('<input type="hidden" class="cms-hidden-input">')
                         .attr('name', inputName)
                         .attr('value', value)
@@ -293,30 +303,34 @@
             }
         },
 
-        createWrapper: function() {
+        createWrapper: function () {
             return $('<div class="cms-wrapper"></div>');
         },
 
-        createTrigger: function() {
+        createTrigger: function () {
             return $('<div class="cms-trigger"><span class="cms-selected-text cms-placeholder">' +
-                    this.settings.placeholder + '</span></div>');
+                this.settings.placeholder + '</span></div>');
         },
 
-        createDropdown: function() {
+        createDropdown: function () {
             return $('<div class="cms-dropdown"></div>');
         },
 
-        createSearchInput: function() {
+        createSearchInput: function () {
             return $('<div class="cms-search-wrapper">' +
-                    '<input type="text" class="cms-search-input" placeholder="' +
-                    this.settings.searchPlaceholder + '" /></div>');
+                '<input type="text" class="cms-search-input" placeholder="' +
+                this.settings.searchPlaceholder + '" /></div>');
         },
 
-        createOptionsContainer: function() {
+        createOptionsContainer: function () {
             return $('<div class="cms-options-container"></div>');
         },
 
-        createButtons: function() {
+        createPreloader: function () {
+            return $('<div class="cms-infinity-preloader"><div class="cms-spinner"></div></div>');
+        },
+
+        createButtons: function () {
             var container = $('<div class="cms-buttons"></div>');
             this.okBtn = $('<button class="cms-btn cms-btn-ok">' + this.settings.okText + '</button>');
             this.cancelBtn = $('<button class="cms-btn cms-btn-cancel">' + this.settings.cancelText + '</button>');
@@ -327,14 +341,14 @@
             return container;
         },
 
-        renderOptions: function() {
+        renderOptions: function () {
             this.optionsContainer.empty();
 
             var selectAllOption = this.createOption('select-all', this.settings.selectAllText, false);
             this.optionsContainer.append(selectAllOption);
 
             var self = this;
-            $.each(this.settings.data, function(key, label) {
+            $.each(this.settings.data, function (key, label) {
                 // For object: key = form value, label = display text
                 // For array: key = index, label = item
                 var value = key;
@@ -347,8 +361,40 @@
 
             this.updateSelectAllState();
         },
+        htmlEncode: function (str) {
+            return String(str)
+                .trim()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        },
+        /**
+         * Append new options to existing list (for pagination)
+         * @param {Object} data - New data to append
+         */
+        appendOptions: function (data) {
+            var self = this;
+            $.each(data, function (key, label) {
+                var value = key;
+                var label = label;
 
-        createOption: function(value, label, checked) {
+                // Check if option already exists
+                var existingOption = self.optionsContainer.find('.cms-option[data-value="' + self.htmlEncode(value) + '"]');
+                if (existingOption.length > 0) {
+                    return; // Skip if already exists
+                }
+
+                var isSelected = $.inArray(value, self.settings.value) !== -1;
+                var option = self.createOption(value, label, isSelected);
+                self.optionsContainer.append(option);
+            });
+
+            this.updateSelectAllState();
+        },
+
+        createOption: function (value, label, checked) {
             var optionClass = 'cms-option';
             if (!this.settings.showCheckbox) {
                 optionClass += ' cms-hide-checkbox';
@@ -358,9 +404,9 @@
                 optionClass += ' selected';
             }
 
-            var option = $('<div class="' + optionClass + '" data-value="' + value + '"></div>');
-            var checkbox = $('<input type="checkbox" value="' + value + '"' +
-                           (checked ? ' checked' : '') + '>');
+            var option = $('<div class="' + optionClass + '" data-value="' + this.htmlEncode(value) + '"></div>');
+            var checkbox = $('<input type="checkbox" value="' + this.htmlEncode(value) + '"' +
+                (checked ? ' checked' : '') + '>');
             var labelEl = $('<label>' + label + '</label>');
 
             option.append(checkbox);
@@ -373,7 +419,7 @@
          * Filter options based on search text
          * @param {String} searchText - Search text to filter by
          */
-        filterOptions: function(searchText) {
+        filterOptions: function (searchText) {
             var self = this;
             var options = this.optionsContainer.find('.cms-option:not([data-value="select-all"])');
 
@@ -382,7 +428,7 @@
                 options.show();
             } else {
                 // Filter options by label
-                options.each(function() {
+                options.each(function () {
                     var option = $(this);
                     var label = option.find('label').text().toLowerCase();
 
@@ -399,7 +445,7 @@
          * Perform AJAX search
          * @param {String} searchText - Search text to send to server
          */
-        performAjaxSearch: function(searchText) {
+        performAjaxSearch: function (searchText) {
             var self = this;
 
             // Show loading state
@@ -410,7 +456,7 @@
                 method: 'GET',
                 data: { q: searchText },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     // Handle different response formats
                     var data = response;
                     if (typeof response === 'object' && response.data) {
@@ -424,7 +470,7 @@
 
                     self.optionsContainer.removeClass('cms-loading');
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('OneSelect: Search error', error);
                     self.optionsContainer.removeClass('cms-loading');
 
@@ -439,12 +485,12 @@
          * Update dropdown with search results
          * @param {Array} data - Search results data
          */
-        updateSearchResults: function(data) {
+        updateSearchResults: function (data) {
             // Clear existing options (except select-all)
             this.optionsContainer.find('.cms-option:not([data-value="select-all"])').remove();
 
             var self = this;
-            $.each(data, function(key, label) {
+            $.each(data, function (key, label) {
                 // For object: key = form value, label = display text
                 // For array: key = index, label = item
                 var value = key;
@@ -459,10 +505,10 @@
             this.updateSelectAllState();
         },
 
-        attachEvents: function() {
+        attachEvents: function () {
             var self = this;
 
-            this.trigger.on('click', function(e) {
+            this.trigger.on('click', function (e) {
                 e.stopPropagation();
                 self.toggle();
             });
@@ -471,11 +517,11 @@
             if (this.settings.showSearch) {
                 if (this.settings.searchUrl) {
                     // AJAX search with debounce
-                    var debouncedSearch = debounce(function(searchText) {
+                    var debouncedSearch = debounce(function (searchText) {
                         self.performAjaxSearch(searchText);
                     }, this.settings.searchDebounceDelay);
 
-                    this.searchInput.find('.cms-search-input').on('keyup', function() {
+                    this.searchInput.find('.cms-search-input').on('keyup', function () {
                         var searchText = $(this).val();
                         if (searchText.length > 0) {
                             debouncedSearch(searchText);
@@ -486,28 +532,28 @@
                     });
                 } else {
                     // Local filtering (default)
-                    this.searchInput.find('.cms-search-input').on('keyup', function() {
+                    this.searchInput.find('.cms-search-input').on('keyup', function () {
                         var searchText = $(this).val().toLowerCase();
                         self.filterOptions(searchText);
                     });
                 }
             }
 
-            $(window).on('resize.cms', function() {
+            $(window).on('resize.cms', function () {
                 if (self.wrapper.hasClass('open')) {
                     self.updateDropdownPosition();
                 }
             });
 
             if (this.settings.closeOnScroll) {
-                $(window).on('scroll.cms', function() {
+                $(window).on('scroll.cms', function () {
                     if (self.wrapper.hasClass('open')) {
                         self.close();
                     }
                 });
             } else {
                 // Update dropdown position on vertical scroll
-                $(window).on('scroll.cms', function() {
+                $(window).on('scroll.cms', function () {
                     if (self.wrapper.hasClass('open')) {
                         self.updateDropdownPosition();
                     }
@@ -516,7 +562,7 @@
 
             // Global horizontal scroll handler - close dropdown on any horizontal scroll
             // Listen for wheel events with horizontal delta
-            $(document).on('wheel.onescroll', function(e) {
+            $(document).on('wheel.onescroll', function (e) {
                 if (!self.wrapper.hasClass('open')) {
                     return;
                 }
@@ -529,7 +575,7 @@
 
             // Also listen for scroll events on all elements to detect horizontal scroll
             // Using MutationObserver to detect when elements with overflow scroll
-            self._detectHorizontalScroll = function() {
+            self._detectHorizontalScroll = function () {
                 if (!self.wrapper.hasClass('open')) return;
 
                 // Check window horizontal scroll
@@ -571,7 +617,7 @@
 
             // Override open to initialize tracking
             var originalOpen = self.open.bind(self);
-            self.open = function() {
+            self.open = function () {
                 // Store initial scroll positions
                 self._elementScrollPositions = {};
                 self._lastWindowScrollX = window.scrollX;
@@ -588,7 +634,7 @@
                 if (self._horizontalScrollInterval) {
                     clearInterval(self._horizontalScrollInterval);
                 }
-                self._horizontalScrollInterval = setInterval(function() {
+                self._horizontalScrollInterval = setInterval(function () {
                     self._detectHorizontalScroll();
                 }, 50);
 
@@ -597,7 +643,7 @@
 
             // Override close to stop tracking
             var originalClose = self.close.bind(self);
-            self.close = function() {
+            self.close = function () {
                 if (self._horizontalScrollInterval) {
                     clearInterval(self._horizontalScrollInterval);
                     self._horizontalScrollInterval = null;
@@ -607,7 +653,7 @@
             };
 
             // Window click handler - close dropdown when clicking outside
-            $(window).on('click.ones', function(e) {
+            $(window).on('click.ones', function (e) {
                 if (!self.settings.closeOnOutside) {
                     return;
                 }
@@ -635,7 +681,7 @@
                 self.close();
             });
 
-            this.optionsContainer.on('click', '.cms-option', function(e) {
+            this.optionsContainer.on('click', '.cms-option', function (e) {
                 e.stopPropagation();
 
                 var option = $(this);
@@ -649,24 +695,50 @@
                 self.handleOptionChange(option);
             });
 
-            this.optionsContainer.on('change', 'input[type="checkbox"]', function(e) {
+            this.optionsContainer.on('change', 'input[type="checkbox"]', function (e) {
                 e.stopPropagation();
                 var option = $(e.target).closest('.cms-option');
                 self.handleOptionChange(option);
             });
 
-            this.okBtn.on('click', function(e) {
+            this.okBtn.on('click', function (e) {
                 e.stopPropagation();
                 self.handleOk();
             });
 
-            this.cancelBtn.on('click', function(e) {
+            this.cancelBtn.on('click', function (e) {
                 e.stopPropagation();
                 self.handleCancel();
             });
+
+            // Infinity Scroll with Debounce - only activate if AJAX is configured
+            if (this.settings.infinityScroll && this.settings.ajax && this.settings.ajax.url) {
+                var debouncedScroll = debounce(function () {
+                    // Check if we have more pages to load
+                    if (!self.hasNextPage) {
+                        return;
+                    }
+
+                    if (!self.settings.loading) {  // Double check loading state
+                        self.loadNextPage();
+                    }
+                }, 200); // 200ms debounce delay
+
+                this.optionsContainer.on('scroll', function () {
+                    var container = $(this);
+                    if (container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 50) {
+                        debouncedScroll();
+                    }
+                });
+            }
+
+            // Legacy onInfinityScroll callback support (deprecated)
+            if (this.settings.infinityScroll && this.settings.onInfinityScroll && !this.settings.ajax) {
+                console.warn('OneSelect: infinityScroll requires ajax configuration. onInfinityScroll callback is deprecated.');
+            }
         },
 
-        handleOptionChange: function(option) {
+        handleOptionChange: function (option) {
             var value = option.data('value');
 
             if (value === 'select-all') {
@@ -681,7 +753,7 @@
                 }
 
                 var self = this;
-                setTimeout(function() {
+                setTimeout(function () {
                     self.updateSelectAllState();
                     self.updateTriggerText();
                 }, 0);
@@ -698,9 +770,9 @@
             }
         },
 
-        handleSelectAll: function(checked) {
+        handleSelectAll: function (checked) {
             var self = this;
-            this.optionsContainer.find('.cms-option:not([data-value="select-all"])').each(function() {
+            this.optionsContainer.find('.cms-option:not([data-value="select-all"])').each(function () {
                 var option = $(this);
                 option.find('input[type="checkbox"]').prop('checked', checked);
                 if (checked) {
@@ -715,7 +787,7 @@
             this.updateHiddenInputs();
         },
 
-        updateSelectAllState: function() {
+        updateSelectAllState: function () {
             var allOptions = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"]');
             var checkedOptions = allOptions.filter(':checked');
             var totalCount = allOptions.length;
@@ -735,10 +807,10 @@
             }
         },
 
-        getSelectedValues: function() {
+        getSelectedValues: function () {
             var values = [];
             this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"]:checked')
-                .each(function() {
+                .each(function () {
                     var val = $(this).val();
                     if (!isNaN(val) && val !== '') {
                         val = Number(val);
@@ -748,17 +820,17 @@
             return values;
         },
 
-        getSelectedLabels: function() {
+        getSelectedLabels: function () {
             var labels = [];
             this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"]:checked')
                 .siblings('label')
-                .each(function() {
+                .each(function () {
                     labels.push($(this).text());
                 });
             return labels;
         },
 
-        updateTriggerText: function() {
+        updateTriggerText: function () {
             var labels = this.getSelectedLabels();
             var values = this.getSelectedValues();
             var textSpan = this.trigger.find('.cms-selected-text');
@@ -769,12 +841,12 @@
                 textSpan.empty().removeClass('cms-placeholder');
 
                 var self = this;
-                $.each(values, function(index, value) {
+                $.each(values, function (index, value) {
                     var badge = $('<span class="cms-badge"></span>');
                     var labelSpan = $('<span></span>').text(labels[index]);
                     var removeBtn = $('<button type="button" class="cms-badge-remove">&times;</button>');
 
-                    removeBtn.on('click', function(e) {
+                    removeBtn.on('click', function (e) {
                         e.stopPropagation();
                         self.unselect(value);
                     });
@@ -791,7 +863,7 @@
             this.updateExternalBadges(values, labels);
         },
 
-        updateExternalBadges: function(values, labels) {
+        updateExternalBadges: function (values, labels) {
             if (!this.settings.showBadgesExternal) {
                 return;
             }
@@ -810,12 +882,12 @@
             }
 
             var self = this;
-            $.each(values, function(index, value) {
+            $.each(values, function (index, value) {
                 var badge = $('<span class="cms-badge"></span>');
                 var labelSpan = $('<span></span>').text(labels[index]);
                 var removeBtn = $('<button type="button" class="cms-badge-remove">&times;</button>');
 
-                removeBtn.on('click', function(e) {
+                removeBtn.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     self.unselect(value);
@@ -827,7 +899,7 @@
             });
         },
 
-        toggle: function() {
+        toggle: function () {
             if (this.wrapper.hasClass('open')) {
                 this.close();
             } else {
@@ -835,7 +907,7 @@
             }
         },
 
-        open: function() {
+        open: function () {
             // Close other open dropdowns
             $('.cms-wrapper.open').not(this.wrapper).removeClass('open');
             $('.cms-dropdown.open').not(this.dropdown).removeClass('open');
@@ -847,7 +919,7 @@
             this.dropdown.addClass('open');
         },
 
-        updateDropdownPosition: function() {
+        updateDropdownPosition: function () {
             var rect = this.wrapper[0].getBoundingClientRect();
             var wrapperHeight = this.wrapper.outerHeight();
             var wrapperWidth = this.wrapper.outerWidth();
@@ -860,12 +932,12 @@
             });
         },
 
-        close: function() {
+        close: function () {
             this.wrapper.removeClass('open');
             this.dropdown.removeClass('open');
         },
 
-        handleOk: function() {
+        handleOk: function () {
             this.updateTriggerText();
 
             var values = this.getSelectedValues();
@@ -882,7 +954,7 @@
             this.close();
         },
 
-        submitForm: function() {
+        submitForm: function () {
             var form = null;
 
             if (this.settings.formId) {
@@ -902,7 +974,7 @@
             form[0].submit();
         },
 
-        handleCancel: function() {
+        handleCancel: function () {
             this.settings.value = [];
             this.optionsContainer.find('input[type="checkbox"]').prop('checked', false);
             this.optionsContainer.find('.cms-option').removeClass('selected');
@@ -921,18 +993,18 @@
             this.close();
         },
 
-        setValue: function(values) {
+        setValue: function (values) {
             this.settings.value = values || [];
             this.renderOptions();
             this.updateTriggerText();
             this.updateHiddenInputs();
         },
 
-        getValue: function() {
+        getValue: function () {
             return this.getSelectedValues();
         },
 
-        updateData: function(data) {
+        updateData: function (data) {
             this.settings.data = data || [];
             this.settings.value = [];
             this.renderOptions();
@@ -940,7 +1012,7 @@
             this.updateHiddenInputs();
         },
 
-        loadData: function(customAjaxConfig, onSuccess, onError) {
+        loadData: function (customAjaxConfig, onSuccess, onError, appendData) {
             var self = this;
             var ajaxConfig = customAjaxConfig || this.settings.ajax;
 
@@ -953,14 +1025,16 @@
                 this.settings.beforeLoad.call(this);
             }
 
-            this.trigger.find('.cms-selected-text').text('Loading...');
+            if (!appendData) {
+                this.trigger.find('.cms-selected-text').text('Loading...');
+            }
 
             var request = $.extend(true, {
                 url: ajaxConfig.url,
                 method: ajaxConfig.method || 'GET',
                 data: ajaxConfig.data || {},
                 dataType: ajaxConfig.dataType || 'json',
-                success: function(response) {
+                success: function (response) {
                     var data = response;
                     if (typeof response === 'object' && response.data) {
                         data = response.data;
@@ -968,8 +1042,28 @@
                         data = response.results;
                     }
 
-                    self.settings.data = data || [];
-                    self.renderOptions();
+                    // Handle hasNextPage from response
+                    if (response && typeof response.hasNextPage !== 'undefined') {
+                        self.hasNextPage = response.hasNextPage;
+                    } else {
+                        self.hasNextPage = false;
+                    }
+
+                    // Handle currentPage from response (optional)
+                    if (response && typeof response.currentPage !== 'undefined') {
+                        self.currentPage = response.currentPage;
+                    }
+
+                    // Append or replace data
+                    if (appendData) {
+                        // Merge new data with existing data
+                        self.settings.data = $.extend({}, self.settings.data, data || {});
+                        self.appendOptions(data || {});
+                    } else {
+                        self.settings.data = data || [];
+                        self.renderOptions();
+                    }
+
                     self.updateTriggerText();
 
                     if (self.settings.afterLoad) {
@@ -980,8 +1074,10 @@
                         onSuccess.call(self, data, response);
                     }
                 },
-                error: function(xhr, status, error) {
-                    self.trigger.find('.cms-selected-text').text('Error loading data');
+                error: function (xhr, status, error) {
+                    if (!appendData) {
+                        self.trigger.find('.cms-selected-text').text('Error loading data');
+                    }
 
                     if (self.settings.onLoadError) {
                         self.settings.onLoadError.call(self, xhr, status, error);
@@ -995,7 +1091,7 @@
 
             if (ajaxConfig.success) {
                 var originalSuccess = request.success;
-                request.success = function(response) {
+                request.success = function (response) {
                     ajaxConfig.success(response);
                     originalSuccess(response);
                 };
@@ -1003,7 +1099,7 @@
 
             if (ajaxConfig.error) {
                 var originalError = request.error;
-                request.error = function(xhr, status, error) {
+                request.error = function (xhr, status, error) {
                     ajaxConfig.error(xhr, status, error);
                     originalError(xhr, status, error);
                 };
@@ -1012,7 +1108,29 @@
             $.ajax(request);
         },
 
-        reload: function() {
+        loadNextPage: function () {
+            var self = this;
+            this.settings.loading = true;
+            this.preloader.show();
+
+            var ajaxConfig = $.extend(true, {}, this.settings.ajax);
+            ajaxConfig.data = ajaxConfig.data || {};
+            ajaxConfig.data.page = this.currentPage + 1;
+
+            this.loadData(ajaxConfig, function (data, response) {
+                self.settings.loading = false;
+                self.preloader.hide();
+
+                if (!response.currentPage) {
+                    self.currentPage++;
+                }
+            }, function () {
+                self.settings.loading = false;
+                self.preloader.hide();
+            }, true);
+        },
+
+        reload: function () {
             if (this.settings.ajax) {
                 this.loadData();
             } else {
@@ -1020,8 +1138,8 @@
             }
         },
 
-        select: function(value) {
-            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + value + '"]');
+        select: function (value) {
+            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + this.htmlEncode(value) + '"]');
             if (checkbox.length) {
                 checkbox.prop('checked', true);
                 checkbox.closest('.cms-option').addClass('selected');
@@ -1031,8 +1149,8 @@
             }
         },
 
-        unselect: function(value) {
-            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + value + '"]');
+        unselect: function (value) {
+            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + this.htmlEncode(value) + '"]');
             if (checkbox.length) {
                 checkbox.prop('checked', false);
                 checkbox.closest('.cms-option').removeClass('selected');
@@ -1042,16 +1160,16 @@
             }
         },
 
-        selectAll: function() {
+        selectAll: function () {
             this.handleSelectAll(true);
         },
 
-        unselectAll: function() {
+        unselectAll: function () {
             this.handleSelectAll(false);
         },
 
-        toggleSelection: function(value) {
-            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + value + '"]');
+        toggleSelection: function (value) {
+            var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + this.htmlEncode(value) + '"]');
             if (checkbox.length) {
                 var isChecked = checkbox.prop('checked');
                 checkbox.prop('checked', !isChecked);
@@ -1069,11 +1187,11 @@
             }
         },
 
-        getInstanceId: function() {
+        getInstanceId: function () {
             return this.instanceId;
         },
 
-        destroy: function() {
+        destroy: function () {
             delete instances[this.instanceId];
 
             $(window).off('.cms');
@@ -1101,25 +1219,25 @@
     /**
      * Get instance by ID
      */
-    OneSelect.getInstance = function(instanceId) {
+    OneSelect.getInstance = function (instanceId) {
         return instances[instanceId] || null;
     };
 
     /**
      * Get all instances
      */
-    OneSelect.getAllInstances = function() {
+    OneSelect.getAllInstances = function () {
         return instances;
     };
 
     /**
      * jQuery Plugin Registration
      */
-    $.fn[pluginName] = function(options) {
+    $.fn[pluginName] = function (options) {
         var args = arguments;
         var returnValue = this;
 
-        this.each(function() {
+        this.each(function () {
             var $this = $(this);
             var instance = $this.data(pluginName);
 
