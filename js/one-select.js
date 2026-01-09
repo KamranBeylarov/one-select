@@ -1,6 +1,6 @@
 /**
  * OneSelect - jQuery Multi-Select Dropdown Plugin
- * Version: 1.2.0
+ * Version: 1.2.1
  * https://github.com/your-repo/one-select
  *
  * Copyright 2026
@@ -447,6 +447,15 @@
             this.updateSelectAllState();
         },
 
+        /**
+         * Generate unique checkbox ID
+         * @param {String} value - Option value
+         * @returns {String} Unique ID
+         */
+        generateCheckboxId: function (value) {
+            return 'cms-checkbox-' + this.instanceId + '-' + String(value).replace(/[^a-zA-Z0-9]/g, '-') + '-' + Math.random().toString(36).substr(2, 9);
+        },
+
         createOption: function (value, label, checked) {
             var optionClass = 'cms-option';
             if (!this.settings.showCheckbox) {
@@ -457,10 +466,13 @@
                 optionClass += ' selected';
             }
 
+            // Generate unique checkbox ID
+            var checkboxId = this.generateCheckboxId(value);
+
             var option = $('<div class="' + optionClass + '" data-value="' + this.htmlEncode(value) + '"></div>');
-            var checkbox = $('<input type="checkbox" value="' + this.htmlEncode(value) + '"' +
+            var checkbox = $('<input type="checkbox" id="' + this.htmlEncode(checkboxId) + '" value="' + this.htmlEncode(value) + '"' +
                 (checked ? ' checked' : '') + '>');
-            var labelEl = $('<label>' + label + '</label>');
+            var labelEl = $('<label for="' + this.htmlEncode(checkboxId) + '">' + label + '</label>');
 
             option.append(checkbox);
             option.append(labelEl);

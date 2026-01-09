@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.2.0 | **Author:** Kamran Baylarov
+**Version:** 1.2.1 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -38,6 +38,7 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 - 📱 **Responsive** - Works on all devices
 - 🌐 **Data Attributes** - Configure via HTML attributes
 - 🔄 **Real-time Sync** - `data-ones-value` attribute updates automatically
+- 🔗 **Label-Checkbox Binding** - Native HTML label-for-id connection for proper accessibility
 - 🎪 **Multiple Instances** - Independent selects on same page
 - 🌪 **Click Outside** - Close dropdown when clicking outside (default: true)
 - 📍 **Smart Positioning** - Dropdown positioned with `position: fixed` using viewport coordinates
@@ -813,7 +814,10 @@ Main CSS classes with `cms-` prefix:
     </div>
     <div class="cms-options-container">
         <div class="cms-option select-all">...</div>
-        <div class="cms-option">...</div>
+        <div class="cms-option">
+            <input type="checkbox" id="cms-checkbox-ones-abc123-value-xy7z9q2" value="Apple">
+            <label for="cms-checkbox-ones-abc123-value-xy7z9q2">Apple</label>
+        </div>
     </div>
     <div class="cms-buttons">
         <button class="cms-btn cms-btn-ok">OK</button>
@@ -823,6 +827,34 @@ Main CSS classes with `cms-` prefix:
 ```
 
 **Note:** The dropdown is positioned using `position: fixed` with viewport coordinates (`getBoundingClientRect()`). This ensures it stays correctly positioned even when parent elements scroll.
+
+### Accessibility & Label-Checkbox Binding
+
+**Native HTML Label-Checkbox Connection:**
+
+Each checkbox is automatically assigned a unique ID, and the label is linked to it using the native HTML `for` attribute:
+
+```html
+<div class="cms-option">
+    <input type="checkbox" id="cms-checkbox-ones-abc123-value-xy7z9q2" value="Apple">
+    <label for="cms-checkbox-ones-abc123-value-xy7z9q2">Apple</label>
+</div>
+```
+
+**Benefits:**
+- ✅ **Proper Accessibility**: Screen readers correctly announce checkbox-label pairs
+- ✅ **Native Browser Behavior**: Clicking the label toggles the checkbox automatically
+- ✅ **No ID Conflicts**: Each checkbox gets a unique ID using instance ID + value + random suffix
+- ✅ **Change Events**: Native `change` event fires when label is clicked
+- ✅ **Multiple Instances**: Different OneSelect instances don't conflict with each other
+
+**ID Format:**
+```
+cms-checkbox-{instanceId}-{sanitizedValue}-{random}
+```
+
+Example: `cms-checkbox-ones-abc123-apple-xy7z9q2`
+
 
 ### Custom CSS Example
 
