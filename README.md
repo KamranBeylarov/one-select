@@ -37,6 +37,7 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 - 🎨 **Fully Customizable** - Complete control with 27+ parameters
 - 📱 **Responsive** - Works on all devices
 - 🌐 **Data Attributes** - Configure via HTML attributes
+- 🔄 **Real-time Sync** - `data-ones-value` attribute updates automatically
 - 🎪 **Multiple Instances** - Independent selects on same page
 - 🌪 **Click Outside** - Close dropdown when clicking outside (default: true)
 - 📍 **Smart Positioning** - Dropdown positioned with `position: fixed` using viewport coordinates
@@ -72,6 +73,7 @@ OneSelect is a powerful **jQuery-based** plugin that provides multi-select funct
 ├── onChange(values, labels) - When selection changes
 ├── onOk(values, labels) - When OK clicked
 ├── onCancel() - When Cancel clicked
+├── data-ones-value sync - Real-time attribute updates
 └── AJAX callbacks (beforeLoad, afterLoad, onLoadError)
 ```
 
@@ -179,7 +181,7 @@ All parameters can be set via HTML data attributes. Data attributes **override J
 | `data-ones-ok-text` | `okText` | String | `data-ones-ok-text="Confirm"` |
 | `data-ones-cancel-text` | `cancelText` | String | `data-ones-cancel-text="Cancel"` |
 | `data-ones-data` | `data` | Array | `data-ones-data='["A","B","C"]'` |
-| `data-ones-value` | `value` | Number/Array | `data-ones-value='"0"'` or `data-ones-value='["0","2"]'` |
+| `data-ones-value` | `value` | Number/Array | `data-ones-value='"0"'` or `data-ones-value='["0","2"]'` (Real-time sync, removed when empty) |
 | `data-ones-name` | `name` | String | `data-ones-name="items"` |
 | `data-ones-multiple` | `multiple` | Boolean | `data-ones-multiple="true"` |
 | `data-ones-show-checkbox` | `showCheckbox` | Boolean | `data-ones-show-checkbox="false"` |
@@ -695,6 +697,35 @@ HTML result:
 <input type="hidden" name="items[]" value="A">
 <input type="hidden" name="items[]" value="B">
 <input type="hidden" name="items[]" value="C">
+```
+
+### data-ones-value Attribute Synchronization
+
+The `data-ones-value` attribute automatically synchronizes with the current selection state:
+
+**Real-time Updates:**
+- Attribute updates immediately when items are selected/deselected
+- Contains JSON array of selected values: `data-ones-value='["A","C"]'`
+- Removed completely when no items are selected (not set to `[]` or `null`)
+
+**Cancel Button Behavior:**
+- Pressing Cancel clears all selections
+- The `data-ones-value` attribute is **removed completely** from the DOM
+- This ensures proper state management on page reload
+
+**Server Integration:**
+```php
+// PHP: Set initial value from POST data
+$selected = isset($_POST['items']) ? json_encode($_POST['items']) : '[]';
+echo '<div id="mySelect" data-ones-value=\'' . $selected . '\'></div>';
+```
+
+**JavaScript Observation:**
+```javascript
+// Watch for attribute changes (useful for debugging)
+$('#mySelect').on('DOMSubtreeModified', function() {
+    console.log($(this).data('ones-value')); // Current value as array
+});
 ```
 
 ---

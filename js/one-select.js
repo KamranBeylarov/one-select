@@ -1,9 +1,9 @@
 /**
  * OneSelect - jQuery Multi-Select Dropdown Plugin
- * Version: 1.0.0
+ * Version: 1.2.0
  * https://github.com/your-repo/one-select
  *
- * Copyright 2024
+ * Copyright 2026
  * Licensed under MIT
  *
  * A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
@@ -213,14 +213,27 @@
             // Register instance in global registry
             instances[this.instanceId] = this;
 
-            // Convert value to array if needed
+            // Convert value to array if needed and sanitize
             if (this.settings.value !== null && this.settings.value !== undefined) {
                 if (!Array.isArray(this.settings.value)) {
                     this.settings.value = [this.settings.value];
                 }
+
+                // Remove null/undefined and duplicates
+                var seen = {};
+                this.settings.value = this.settings.value.filter(function (v) {
+                    if (v === null || v === undefined) return false;
+                    var strV = String(v).trim();
+                    if (seen[strV]) return false;
+                    seen[strV] = true;
+                    return true;
+                });
             } else {
                 this.settings.value = [];
             }
+
+            // Sync initial value to data attribute
+            this.updateDataValueAttribute();
 
             // Initialize pagination state for infinity scroll
             this.currentPage = 1;
@@ -284,17 +297,32 @@
 
             var selectedValues = this.getSelectedValues();
 
+            // Filter out null/undefined/empty to prevent backend errors
+            if (Array.isArray(selectedValues)) {
+                selectedValues = selectedValues.filter(function (v) {
+                    return v !== null && v !== undefined && String(v).trim() !== '';
+                });
+            }
+
             if (this.settings.multiple) {
-                $.each(selectedValues, function (index, value) {
+                if (selectedValues.length === 0) {
                     var hiddenInput = $('<input type="hidden" class="cms-hidden-input">')
-                        .attr('name', inputName)
-                        .attr('value', value)
-                        .attr('data-cms-input', this.settings.name)
-                        .attr('data-cms-value', value);
+                        .attr('name', this.settings.name)
+                        .attr('value', '')
+                        .attr('data-cms-input', this.settings.name);
                     container.append(hiddenInput);
-                }.bind(this));
+                } else {
+                    $.each(selectedValues, function (index, value) {
+                        var hiddenInput = $('<input type="hidden" class="cms-hidden-input">')
+                            .attr('name', inputName)
+                            .attr('value', value)
+                            .attr('data-cms-input', this.settings.name)
+                            .attr('data-cms-value', value);
+                        container.append(hiddenInput);
+                    }.bind(this));
+                }
             } else {
-                var value = selectedValues.length > 0 ? selectedValues.join(',') : '';
+                var value = selectedValues.length > 0 ? selectedValues[0] : '';
                 var hiddenInput = $('<input type="hidden" class="cms-hidden-input">')
                     .attr('name', inputName)
                     .attr('value', value)
@@ -380,6 +408,21 @@
             }
             return String(this.settings.value).trim() === String(value).trim();
         },
+
+        /**
+         * Update the data-ones-value attribute to keep it in sync with settings.value
+         * Removes attribute if value is empty, otherwise sets it to JSON array
+         */
+        updateDataValueAttribute: function () {
+            if (!this.settings.value || this.settings.value.length === 0) {
+                // Remove attribute completely when empty
+                this.$element.removeAttr('data-ones-value');
+            } else {
+                // Update with current value as JSON
+                this.$element.attr('data-ones-value', JSON.stringify(this.settings.value));
+            }
+        },
+
         /**
          * Append new options to existing list (for pagination)
          * @param {Object} data - New data to append
@@ -692,23 +735,32 @@
             });
 
             this.optionsContainer.on('click', '.cms-option', function (e) {
+                var $target = $(e.target);
+
+                // If clicking label or checkbox, browser already handles toggle
+                if ($target.is('input[type="checkbox"]') || $target.closest('label').length > 0 || $target.closest('button').length > 0) {
+                    return;
+                }
+
+                e.preventDefault();
                 e.stopPropagation();
 
                 var option = $(this);
                 var checkbox = option.find('input[type="checkbox"]');
-
-                if ($(e.target).is('input[type="checkbox"]')) {
-                    return;
-                }
-
-                checkbox.prop('checked', !checkbox.prop('checked'));
-                self.handleOptionChange(option);
+                checkbox.prop('checked', !checkbox.prop('checked')).trigger('change');
             });
 
             this.optionsContainer.on('change', 'input[type="checkbox"]', function (e) {
                 e.stopPropagation();
-                var option = $(e.target).closest('.cms-option');
-                self.handleOptionChange(option);
+                var checkbox = $(this);
+                var option = checkbox.closest('.cms-option');
+                var value = option.data('value');
+
+                if (value === 'select-all') {
+                    self.handleSelectAll(checkbox.prop('checked'));
+                } else {
+                    self.handleOptionChange(option);
+                }
             });
 
             this.okBtn.on('click', function (e) {
@@ -750,26 +802,14 @@
 
         handleOptionChange: function (option) {
             var value = option.data('value');
+            var checkbox = option.find('input[type="checkbox"]');
+            var isChecked = checkbox.prop('checked');
 
-            if (value === 'select-all') {
-                var checkbox = option.find('input[type="checkbox"]');
-                this.handleSelectAll(checkbox.prop('checked'));
+            if (isChecked) {
+                this.select(value);
             } else {
-                var checkbox = option.find('input[type="checkbox"]');
-                if (checkbox.prop('checked')) {
-                    option.addClass('selected');
-                } else {
-                    option.removeClass('selected');
-                }
-
-                var self = this;
-                setTimeout(function () {
-                    self.updateSelectAllState();
-                    self.updateTriggerText();
-                }, 0);
+                this.unselect(value);
             }
-
-            this.updateHiddenInputs();
 
             if (this.settings.onChange) {
                 this.settings.onChange.call(this, this.getSelectedValues(), this.getSelectedLabels());
@@ -809,6 +849,7 @@
             this.updateSelectAllState();
             this.updateTriggerText();
             this.updateHiddenInputs();
+            this.updateDataValueAttribute();
         },
 
         updateSelectAllState: function () {
@@ -832,16 +873,11 @@
         },
 
         getSelectedValues: function () {
-            var values = [];
-            this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"]:checked')
-                .each(function () {
-                    var val = $(this).val();
-                    if (!isNaN(val) && val !== '') {
-                        val = Number(val);
-                    }
-                    values.push(val);
-                });
-            return values;
+            // Return unique sanitized settings.value
+            if (!Array.isArray(this.settings.value)) {
+                return [];
+            }
+            return this.settings.value;
         },
 
         getSelectedLabels: function () {
@@ -867,9 +903,18 @@
                 textSpan.empty().removeClass('cms-placeholder');
 
                 var self = this;
+                var self = this;
                 $.each(values, function (index, value) {
                     var badge = $('<span class="cms-badge"></span>');
-                    var labelSpan = $('<span></span>').text(labels[index]);
+
+                    // Find label from DOM (if exists) or fallback to value
+                    var labelText = value;
+                    var option = self.optionsContainer.find('.cms-option[data-value="' + self.htmlEncode(value) + '"]');
+                    if (option.length) {
+                        labelText = option.find('label').text();
+                    }
+
+                    var labelSpan = $('<span></span>').text(labelText);
                     var removeBtn = $('<button type="button" class="cms-badge-remove">&times;</button>');
 
                     removeBtn.on('click', function (e) {
@@ -977,6 +1022,7 @@
                 this.submitForm();
             }
 
+            this.updateDataValueAttribute();
             this.close();
         },
 
@@ -1007,6 +1053,7 @@
             this.updateSelectAllState();
             this.updateTriggerText();
             this.updateHiddenInputs();
+            this.updateDataValueAttribute();
 
             if (this.settings.onCancel) {
                 this.settings.onCancel.call(this);
@@ -1024,6 +1071,7 @@
             this.renderOptions();
             this.updateTriggerText();
             this.updateHiddenInputs();
+            this.updateDataValueAttribute();
         },
 
         getValue: function () {
@@ -1036,6 +1084,7 @@
             this.renderOptions();
             this.updateTriggerText();
             this.updateHiddenInputs();
+            this.updateDataValueAttribute();
         },
 
         loadData: function (customAjaxConfig, onSuccess, onError, appendData) {
@@ -1165,38 +1214,46 @@
         },
 
         select: function (value) {
+            var self = this;
             var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + this.htmlEncode(value) + '"]');
+
             if (checkbox.length) {
                 checkbox.prop('checked', true);
                 checkbox.closest('.cms-option').addClass('selected');
-
-                if (Array.isArray(this.settings.value)) {
-                    if (!this.isValueSelected(value)) {
-                        this.settings.value.push(value);
-                    }
-                }
-
-                this.updateSelectAllState();
-                this.updateTriggerText();
-                this.updateHiddenInputs();
             }
+
+            if (Array.isArray(this.settings.value)) {
+                if (!this.isValueSelected(value)) {
+                    this.settings.value.push(value);
+                }
+            }
+
+            this.updateSelectAllState();
+            this.updateTriggerText();
+            this.updateHiddenInputs();
+            this.updateDataValueAttribute();
         },
 
         unselect: function (value) {
+            var self = this;
             var checkbox = this.optionsContainer.find('.cms-option:not([data-value="select-all"]) input[type="checkbox"][value="' + this.htmlEncode(value) + '"]');
+
             if (checkbox.length) {
                 checkbox.prop('checked', false);
                 checkbox.closest('.cms-option').removeClass('selected');
-
-                if (Array.isArray(this.settings.value)) {
-                    var strValue = String(value).trim();
-                    this.settings.value = this.settings.value.filter(function (v) { return String(v).trim() !== strValue });
-                }
-
-                this.updateSelectAllState();
-                this.updateTriggerText();
-                this.updateHiddenInputs();
             }
+
+            if (Array.isArray(this.settings.value)) {
+                var strValue = String(value).trim();
+                this.settings.value = this.settings.value.filter(function (v) {
+                    return String(v).trim() !== strValue;
+                });
+            }
+
+            this.updateSelectAllState();
+            this.updateTriggerText();
+            this.updateHiddenInputs();
+            this.updateDataValueAttribute();
         },
 
         selectAll: function () {
