@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.2.1 | **Author:** Kamran Baylarov
+**Version:** 1.2.2 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -591,12 +591,15 @@ The dropdown automatically closes when the user performs any horizontal scrollin
 
 ### How It Works
 
-The plugin uses two methods to detect horizontal scroll:
+The plugin uses **Wheel Event Detection** to detect horizontal scrolling:
 
-1. **Wheel Event Detection**: Detects horizontal mouse/touchpad scrolling in real-time
-2. **Periodic Scroll Checking**: Every 50ms, checks if any scrollable element's `scrollLeft` position has changed
+1. **Wheel Event Listener**: Listens for `wheel` events on the document
+2. **Device Detection**: Automatically detects Apple devices (iOS, macOS, iPadOS)
+3. **Threshold-Based Closing**:
+   - **Apple devices**: Closes only when horizontal scroll exceeds **100px** threshold
+   - **Other devices**: Closes immediately on any horizontal scroll (0px threshold)
 
-When horizontal scroll is detected, the dropdown immediately closes.
+This prevents accidental dropdown closure on Apple devices due to sensitive trackpad/swipe gestures while maintaining responsive behavior on other platforms.
 
 ### Example
 

@@ -1,6 +1,6 @@
 /**
  * OneSelect - jQuery Multi-Select Dropdown Plugin
- * Version: 1.2.1
+ * Version: 1.2.2
  * https://github.com/your-repo/one-select
  *
  * Copyright 2026
@@ -209,6 +209,18 @@
             return dataOptions;
         },
 
+        /**
+         * Detect if current device is an Apple device
+         * @returns {Boolean} True if Apple device (iOS, macOS, iPadOS)
+         */
+        isAppleDevice: function () {
+            var isAppleDevice = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ||
+                               navigator.platform.toUpperCase().indexOf('IPHONE') >= 0 ||
+                               navigator.platform.toUpperCase().indexOf('IPAD') >= 0 ||
+                               navigator.userAgent.indexOf('Macintosh') !== -1;
+            return isAppleDevice;
+        },
+
         init: function () {
             // Register instance in global registry
             instances[this.instanceId] = this;
@@ -238,6 +250,9 @@
             // Initialize pagination state for infinity scroll
             this.currentPage = 1;
             this.hasNextPage = false;
+
+            // Detect Apple device for horizontal scroll threshold
+            this._isAppleDevice = this.isAppleDevice();
 
             this.wrapper = this.createWrapper();
             this.trigger = this.createTrigger();
@@ -627,95 +642,18 @@
 
             // Global horizontal scroll handler - close dropdown on any horizontal scroll
             // Listen for wheel events with horizontal delta
+            // Set threshold based on device (100px for Apple, 0 for others)
+            var horizontalScrollThreshold = self._isAppleDevice ? 100 : 0;
             $(document).on('wheel.onescroll', function (e) {
                 if (!self.wrapper.hasClass('open')) {
                     return;
                 }
 
-                // Check if horizontal scrolling (deltaX != 0)
-                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > 0) {
+                // Check if horizontal scrolling (deltaX > threshold)
+                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > horizontalScrollThreshold) {
                     self.close();
                 }
             });
-
-            // Also listen for scroll events on all elements to detect horizontal scroll
-            // Using MutationObserver to detect when elements with overflow scroll
-            self._detectHorizontalScroll = function () {
-                if (!self.wrapper.hasClass('open')) return;
-
-                // Check window horizontal scroll
-                if (window.scrollX !== self._lastWindowScrollX) {
-                    self._lastWindowScrollX = window.scrollX;
-                    if (self._lastWindowScrollX > 0) {
-                        self.close();
-                        return;
-                    }
-                }
-
-                // Check all scrollable elements for horizontal scroll
-                var scrollableElements = document.querySelectorAll('*');
-                for (var i = 0; i < scrollableElements.length; i++) {
-                    var el = scrollableElements[i];
-                    var key = getElementKey(el);
-
-                    if (self._elementScrollPositions[key] !== undefined) {
-                        var currentScroll = el.scrollLeft;
-                        if (currentScroll !== self._elementScrollPositions[key]) {
-                            // Horizontal scroll detected
-                            self.close();
-                            return;
-                        }
-                    }
-                }
-            };
-
-            // Store scroll positions and track changes
-            self._elementScrollPositions = {};
-            self._lastWindowScrollX = window.scrollX;
-
-            function getElementKey(el) {
-                if (el === document) return 'document';
-                if (el === document.documentElement) return 'html';
-                if (el === document.body) return 'body';
-                return el.tagName + '-' + (el.id || el.className || Math.random().toString(36).substr(2, 9));
-            }
-
-            // Override open to initialize tracking
-            var originalOpen = self.open.bind(self);
-            self.open = function () {
-                // Store initial scroll positions
-                self._elementScrollPositions = {};
-                self._lastWindowScrollX = window.scrollX;
-
-                var scrollableElements = document.querySelectorAll('*');
-                for (var i = 0; i < scrollableElements.length; i++) {
-                    var el = scrollableElements[i];
-                    if (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) {
-                        self._elementScrollPositions[getElementKey(el)] = el.scrollLeft;
-                    }
-                }
-
-                // Start checking periodically
-                if (self._horizontalScrollInterval) {
-                    clearInterval(self._horizontalScrollInterval);
-                }
-                self._horizontalScrollInterval = setInterval(function () {
-                    self._detectHorizontalScroll();
-                }, 50);
-
-                originalOpen();
-            };
-
-            // Override close to stop tracking
-            var originalClose = self.close.bind(self);
-            self.close = function () {
-                if (self._horizontalScrollInterval) {
-                    clearInterval(self._horizontalScrollInterval);
-                    self._horizontalScrollInterval = null;
-                }
-                self._elementScrollPositions = {};
-                originalClose();
-            };
 
             // Window click handler - close dropdown when clicking outside
             $(window).on('click.ones', function (e) {
@@ -1318,12 +1256,6 @@
             this.okBtn.off();
             this.cancelBtn.off();
             this.optionsContainer.off();
-
-            // Clear horizontal scroll tracking interval
-            if (this._horizontalScrollInterval) {
-                clearInterval(this._horizontalScrollInterval);
-                this._horizontalScrollInterval = null;
-            }
 
             $('input.cms-hidden-input[data-cms-input="' + this.settings.name + '"]').remove();
 
