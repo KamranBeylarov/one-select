@@ -1047,7 +1047,7 @@
             }
 
             if (this.settings.beforeLoad) {
-                this.settings.beforeLoad.call(this);
+                this.settings.beforeLoad.call(this, ajaxConfig);
             }
 
             if (!appendData) {

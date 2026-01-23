@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.2.2 | **Author:** Kamran Baylarov
+**Version:** 1.2.3 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -313,7 +313,9 @@ $('#mySelect').oneSelect({
         url: '/api/items',
         method: 'GET'
     },
-    beforeLoad: function() {
+    beforeLoad: function(ajaxConfig) {
+        // Modify request before sending
+        // ajaxConfig.url, ajaxConfig.data, etc.
         $('#loading').show();
     },
     afterLoad: function(response) {
@@ -322,6 +324,31 @@ $('#mySelect').oneSelect({
     },
     onLoadError: function(error) {
         $('#error').text('Error: ' + error);
+    }
+});
+```
+
+**beforeLoad with infinityScroll + Search:**
+
+```javascript
+$('.my-select').oneSelect({
+    ajax: {
+        url: '/api/data',
+        data: { page: 1 }
+    },
+    searchUrl: '/api/data',
+    infinityScroll: true,
+
+    beforeLoad: function(ajaxConfig) {
+        // Read search input value and add to request
+        if (this.searchInput && this.searchInput.length) {
+            var searchTerm = this.searchInput.find('.cms-search-input').val().trim();
+
+            if (searchTerm) {
+                ajaxConfig.data = ajaxConfig.data || {};
+                ajaxConfig.data.q = searchTerm;  // Add search query parameter
+            }
+        }
     }
 });
 ```
