@@ -1,6 +1,6 @@
 /**
  * OneSelect - jQuery Multi-Select Dropdown Plugin
- * Version: 1.2.2
+ * Version: 1.2.4
  * https://github.com/your-repo/one-select
  *
  * Copyright 2026
@@ -640,20 +640,157 @@
                 });
             }
 
-            // Global horizontal scroll handler - close dropdown on any horizontal scroll
-            // Listen for wheel events with horizontal delta
-            // Set threshold based on device (100px for Apple, 0 for others)
+            // ============================================================================
+            // HORIZONTAL SCROLL HANDLER - Close dropdown on horizontal scroll
+            // ============================================================================
+
+            // ============================================================================
+            // OLD: wheel.onescroll event (DEPRECATED - Replaced with scroll capturing)
+            // This approach only worked for wheel events (touchpad/mouse wheel)
+            // and did NOT work for scrollbar drag, touch swipe, or keyboard scroll.
+            //
+            // var horizontalScrollThreshold = self._isAppleDevice ? 100 : 0;
+            // $(document).on('wheel.onescroll', function (e) {
+            //     if (!self.wrapper.hasClass('open')) {
+            //         return;
+            //     }
+            //     if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > horizontalScrollThreshold) {
+            //         self.close();
+            //     }
+            // });
+            // ============================================================================
+
+            // NEW: Scroll capturing approach (covers ALL scroll methods)
+            // Uses event capturing to intercept scroll events before they reach their target
+            // This works for:
+            // - Touchpad/mouse wheel horizontal scroll ✅
+            // - Scrollbar drag ✅
+            // - Touch swipe ✅
+            // - Keyboard arrow keys ✅
+            // - JavaScript scroll() ✅
+
+            // Store scroll positions for delta calculation
+            var scrollPositions = {};
+
+            // Store accumulated horizontal delta for Apple devices
+            // This tracks the total horizontal scroll distance across multiple scroll events
+            // Stored on 'self' so it can be reset when dropdown opens/closes
+            self._accumulatedHorizontalDelta = 0;
+
+            // Set threshold based on device type
+            // Apple devices: 100px threshold (to avoid accidental closure from trackpad gestures)
+            // Other devices: 0px threshold (immediate closure on any horizontal scroll)
             var horizontalScrollThreshold = self._isAppleDevice ? 100 : 0;
-            $(document).on('wheel.onescroll', function (e) {
+
+            // Scroll event handler with capturing
+            var scrollHandler = function (e) {
+                // Only act if dropdown is open
                 if (!self.wrapper.hasClass('open')) {
+                    // Dropdown closed - just update scroll positions for next time
+                    scrollPositions[e.target] = {
+                        left: e.target.scrollLeft,
+                        top: e.target.scrollTop
+                    };
                     return;
                 }
 
-                // Check if horizontal scrolling (deltaX > threshold)
-                if (e.originalEvent && Math.abs(e.originalEvent.deltaX) > horizontalScrollThreshold) {
-                    self.close();
+                var target = e.target;
+
+                // ========================================================================
+                // IMPORTANT: Ignore scroll events from INSIDE the dropdown
+                // ========================================================================
+                // When user scrolls through dropdown options (.cms-options-container),
+                // we should NOT close the dropdown. Only close when OUTSIDE elements scroll.
+                // ========================================================================
+                var isInsideDropdown = $(target).closest('.cms-dropdown, .cms-wrapper').length > 0;
+                if (isInsideDropdown) {
+                    // This scroll is happening inside the dropdown - IGNORE it
+                    // User is just scrolling through options, don't close the dropdown
+                    scrollPositions[target] = {
+                        left: target.scrollLeft,
+                        top: target.scrollTop
+                    };
+                    return;
                 }
-            });
+                // ========================================================================
+
+                // Check if target is scrollable
+                // If element has no scrollable content, ignore this event
+                if (target.scrollWidth <= target.clientWidth &&
+                    target.scrollHeight <= target.clientHeight) {
+                    return;
+                }
+
+                // Get previous scroll position
+                var prevPos = scrollPositions[target];
+
+                if (!prevPos) {
+                    // First scroll event for this element - store position and wait
+                    scrollPositions[target] = {
+                        left: target.scrollLeft,
+                        top: target.scrollTop
+                    };
+                    return;
+                }
+
+                // Calculate scroll deltas
+                var currentScrollLeft = target.scrollLeft;
+                var currentScrollTop = target.scrollTop;
+                var horizontalDelta = Math.abs(currentScrollLeft - prevPos.left);
+                var verticalDelta = Math.abs(currentScrollTop - prevPos.top);
+
+                // ONLY respond to HORIZONTAL scroll (ignore vertical scroll)
+                // Vertical scroll should NOT close the dropdown
+                if (horizontalDelta === 0) {
+                    // Only vertical scroll occurred - update position and continue
+                    scrollPositions[target] = {
+                        left: currentScrollLeft,
+                        top: currentScrollTop
+                    };
+                    return;
+                }
+
+                // ====================================================================
+                // HORIZONTAL SCROLL DETECTED - Handle differently for Apple vs others
+                // ====================================================================
+                if (self._isAppleDevice) {
+                    // APPLE DEVICES: Accumulate delta across multiple scroll events
+                    // Trackpad gestures produce many small scroll events (momentum scrolling)
+                    // We need to accumulate these small deltas to reach the 100px threshold
+                    self._accumulatedHorizontalDelta += horizontalDelta;
+
+                    if (self._accumulatedHorizontalDelta > horizontalScrollThreshold) {
+                        // Total accumulated scroll exceeded 100px - close dropdown
+                        self.close();
+                        return;
+                    }
+                    // Threshold not yet reached - continue accumulating
+                } else {
+                    // OTHER DEVICES (Windows, Linux, Android): Close immediately
+                    // No need for accumulation - close on first horizontal scroll
+                    if (horizontalDelta > horizontalScrollThreshold) {
+                        self.close();
+                        return;
+                    }
+                }
+                // ====================================================================
+
+                // Update position for next scroll
+                scrollPositions[target] = {
+                    left: currentScrollLeft,
+                    top: currentScrollTop
+                };
+            };
+
+            // Attach scroll listener using event CAPTURING phase
+            // The 'true' parameter enables capturing mode
+            // This allows us to intercept scroll events even if they don't bubble
+            document.addEventListener('scroll', scrollHandler, true);
+
+            // Store handler reference for cleanup in destroy() method
+            self._scrollHandler = scrollHandler;
+            // ============================================================================
+
 
             // Window click handler - close dropdown when clicking outside
             $(window).on('click.ones', function (e) {
@@ -929,6 +1066,10 @@
         },
 
         open: function () {
+            // Reset accumulated horizontal delta when dropdown opens
+            // This ensures a clean slate for tracking horizontal scroll distance
+            this._accumulatedHorizontalDelta = 0;
+
             // Close other open dropdowns
             $('.cms-wrapper.open').not(this.wrapper).removeClass('open');
             $('.cms-dropdown.open').not(this.dropdown).removeClass('open');
@@ -954,6 +1095,9 @@
         },
 
         close: function () {
+            // Reset accumulated horizontal delta when dropdown closes
+            this._accumulatedHorizontalDelta = 0;
+
             this.wrapper.removeClass('open');
             this.dropdown.removeClass('open');
         },
@@ -1252,6 +1396,16 @@
             $(window).off('.cms');
             $(window).off('.ones');
             $(document).off('.onescroll');
+
+            // Remove scroll capturing listener
+            if (this._scrollHandler) {
+                document.removeEventListener('scroll', this._scrollHandler, true);
+                this._scrollHandler = null;
+            }
+
+            // Clean up accumulated horizontal delta
+            this._accumulatedHorizontalDelta = null;
+
             this.trigger.off();
             this.okBtn.off();
             this.cancelBtn.off();
