@@ -1,6 +1,6 @@
 # 🎯 OneSelect - jQuery Multi-Select Dropdown Component
 
-**Version:** 1.2.3 | **Author:** Kamran Baylarov
+**Version:** 1.3.0 | **Author:** Kamran Baylarov
 
 A powerful, flexible, and feature-rich multi-select dropdown component for jQuery.
 
@@ -137,37 +137,38 @@ $('#mySelect').oneSelect({
 
 ## ⚙️ All Parameters
 
-| Parameter | Type | Default | Description |
-|---------|-----|---------|-------------|
+| Parameter | Type | Default               | Description |
+|---------|-----|-----------------------|-------------|
 | `placeholder` | String | `'Select options...'` | Placeholder text when nothing selected |
-| `selectAllText` | String | `'Select All'` | "Select All" button text |
-| `okText` | String | `'OK'` | OK button text |
-| `cancelText` | String | `'Cancel'` | Cancel button text |
-| `data` | Array/Object | `[]` | Options list (string array or key-value object) |
-| `value` | Number/Array/String/null | `null` | Single index, key, or array to pre-select |
-| `showCheckbox` | Boolean | `true` | Show/hide checkboxes |
-| `showBadges` | Boolean | `false` | Show badges in trigger |
-| `showBadgesExternal` | String/null | `null` | External element ID (for badges) |
-| `showSearch` | Boolean | `false` | Show search input in dropdown |
-| `searchPlaceholder` | String | `'Search...'` | Search input placeholder text |
-| `searchUrl` | String/null | `null` | URL for AJAX search (GET request with `q` parameter) |
-| `searchDebounceDelay` | Number | `300` | Delay in milliseconds for search debounce |
-| `closeOnScroll` | Boolean | `false` | Close dropdown on page scroll |
-| `closeOnOutside` | Boolean | `true` | Close dropdown when clicking outside |
-| `submitForm` | Boolean | `false` | Submit form on OK click |
-| `submitOnOutside` | Boolean | `false` | Submit form on outside click |
-| `formId` | String/null | `null` | Specific form ID (null: parent form) |
-| `name` | String/null | `null` | Hidden input name attribute |
-| `multiple` | Boolean | `true` | Submit as array (name[]) |
-| `ajax` | Object/null | `null` | AJAX configuration object |
-| `autoLoad` | Boolean | `true` | Auto load data via AJAX |
-| `beforeLoad` | Function/null | `null` | Called before AJAX |
-| `afterLoad` | Function/null | `null` | Called after AJAX success |
-| `onLoadError` | Function/null | `null` | Called on AJAX error |
-| `onChange` | Function/null | `null` | Called when selection changes |
-| `onSelect` | Function/null | `null` | Previous version of onChange |
-| `onOk` | Function/null | `null` | Called when OK clicked |
-| `onCancel` | Function/null | `null` | Called when Cancel clicked |
+| `selectAllText` | String | `'Select All'`        | "Select All" button text |
+| `okText` | String | `'OK'`                | OK button text |
+| `cancelText` | String | `'Cancel'`            | Cancel button text |
+| `data` | Array/Object | `[]`                  | Options list (string array or key-value object) |
+| `value` | Number/Array/String/null | `null`                | Single index, key, or array to pre-select |
+| `showCheckbox` | Boolean | `true`                | Show/hide checkboxes |
+| `showBadges` | Boolean | `false`               | Show badges in trigger |
+| `showBadgesExternal` | String/null | `null`                | External element ID (for badges) |
+| `showSearch` | Boolean | `false`               | Show search input in dropdown |
+| `searchPlaceholder` | String | `'Search...'`         | Search input placeholder text |
+| `searchUrl` | String/null | `null`                | URL for AJAX search (GET request with `q` parameter) |
+| `searchDebounceDelay` | Number | `300`                 | Delay in milliseconds for search debounce |
+| `locale` | String | `'az-AZ'`             | Locale for case-insensitive search (e.g., `'tr-TR'`, `'az-AZ'`, `'en-US'`) |
+| `closeOnScroll` | Boolean | `false`               | Close dropdown on page scroll |
+| `closeOnOutside` | Boolean | `true`                | Close dropdown when clicking outside |
+| `submitForm` | Boolean | `false`               | Submit form on OK click |
+| `submitOnOutside` | Boolean | `false`               | Submit form on outside click |
+| `formId` | String/null | `null`                | Specific form ID (null: parent form) |
+| `name` | String/null | `null`                | Hidden input name attribute |
+| `multiple` | Boolean | `true`                | Submit as array (name[]) |
+| `ajax` | Object/null | `null`                | AJAX configuration object |
+| `autoLoad` | Boolean | `true`                | Auto load data via AJAX |
+| `beforeLoad` | Function/null | `null`                | Called before AJAX |
+| `afterLoad` | Function/null | `null`                | Called after AJAX success |
+| `onLoadError` | Function/null | `null`                | Called on AJAX error |
+| `onChange` | Function/null | `null`                | Called when selection changes |
+| `onSelect` | Function/null | `null`                | Previous version of onChange |
+| `onOk` | Function/null | `null`                | Called when OK clicked |
+| `onCancel` | Function/null | `null`                | Called when Cancel clicked |
 
 ---
 
@@ -175,30 +176,31 @@ $('#mySelect').oneSelect({
 
 All parameters can be set via HTML data attributes. Data attributes **override JS parameters**.
 
-| Data Attribute | Parameter | Type | Example |
-|----------------|----------|-----|---------|
-| `data-ones-placeholder` | `placeholder` | String | `data-ones-placeholder="Select..."` |
-| `data-ones-select-all-text` | `selectAllText` | String | `data-ones-select-all-text="Select All"` |
-| `data-ones-ok-text` | `okText` | String | `data-ones-ok-text="Confirm"` |
-| `data-ones-cancel-text` | `cancelText` | String | `data-ones-cancel-text="Cancel"` |
-| `data-ones-data` | `data` | Array | `data-ones-data='["A","B","C"]'` |
+| Data Attribute | Parameter | Type | Example                                                                                       |
+|----------------|----------|-----|-----------------------------------------------------------------------------------------------|
+| `data-ones-placeholder` | `placeholder` | String | `data-ones-placeholder="Select..."`                                                           |
+| `data-ones-select-all-text` | `selectAllText` | String | `data-ones-select-all-text="Select All"`                                                      |
+| `data-ones-ok-text` | `okText` | String | `data-ones-ok-text="Confirm"`                                                                 |
+| `data-ones-cancel-text` | `cancelText` | String | `data-ones-cancel-text="Cancel"`                                                              |
+| `data-ones-data` | `data` | Array | `data-ones-data='["A","B","C"]'`                                                              |
 | `data-ones-value` | `value` | Number/Array | `data-ones-value='"0"'` or `data-ones-value='["0","2"]'` (Real-time sync, removed when empty) |
-| `data-ones-name` | `name` | String | `data-ones-name="items"` |
-| `data-ones-multiple` | `multiple` | Boolean | `data-ones-multiple="true"` |
-| `data-ones-show-checkbox` | `showCheckbox` | Boolean | `data-ones-show-checkbox="false"` |
-| `data-ones-show-badges` | `showBadges` | Boolean | `data-ones-show-badges="true"` |
-| `data-ones-show-badges-external` | `showBadgesExternal` | String | `data-ones-show-badges-external="badgesDiv"` |
-| `data-ones-show-search` | `showSearch` | Boolean | `data-ones-show-search="true"` |
-| `data-ones-search-placeholder` | `searchPlaceholder` | String | `data-ones-search-placeholder="Search items..."` |
-| `data-ones-search-url` | `searchUrl` | String | `data-ones-search-url="/api/search"` |
-| `data-ones-search-debounce-delay` | `searchDebounceDelay` | Number | `data-ones-search-debounce-delay="500"` |
-| `data-ones-close-on-scroll` | `closeOnScroll` | Boolean | `data-ones-close-on-scroll="true"` |
-| `data-ones-close-on-outside` | `closeOnOutside` | Boolean | `data-ones-close-on-outside="true"` |
-| `data-ones-submit-form` | `submitForm` | Boolean | `data-ones-submit-form="true"` |
-| `data-ones-submit-on-outside` | `submitOnOutside` | Boolean | `data-ones-submit-on-outside="true"` |
-| `data-ones-form-id` | `formId` | String | `data-ones-form-id="myForm"` |
-| `data-ones-auto-load` | `autoLoad` | Boolean | `data-ones-auto-load="false"` |
-| `data-ones-ajax` | `ajax` | String/Object | `data-ones-ajax="/api/items"` or `data-ones-ajax='{"url": "/api/items","method":"POST"}'` |
+| `data-ones-name` | `name` | String | `data-ones-name="items"`                                                                      |
+| `data-ones-multiple` | `multiple` | Boolean | `data-ones-multiple="true"`                                                                   |
+| `data-ones-show-checkbox` | `showCheckbox` | Boolean | `data-ones-show-checkbox="false"`                                                             |
+| `data-ones-show-badges` | `showBadges` | Boolean | `data-ones-show-badges="true"`                                                                |
+| `data-ones-show-badges-external` | `showBadgesExternal` | String | `data-ones-show-badges-external="badgesDiv"`                                                  |
+| `data-ones-show-search` | `showSearch` | Boolean | `data-ones-show-search="true"`                                                                |
+| `data-ones-search-placeholder` | `searchPlaceholder` | String | `data-ones-search-placeholder="Search items..."`                                              |
+| `data-ones-search-url` | `searchUrl` | String | `data-ones-search-url="/api/search"`                                                          |
+| `data-ones-search-debounce-delay` | `searchDebounceDelay` | Number | `data-ones-search-debounce-delay="500"`                                                       |
+| `data-ones-locale` | `locale` | String | `data-ones-locale="az-AZ"`                                                                    |
+| `data-ones-close-on-scroll` | `closeOnScroll` | Boolean | `data-ones-close-on-scroll="true"`                                                            |
+| `data-ones-close-on-outside` | `closeOnOutside` | Boolean | `data-ones-close-on-outside="true"`                                                           |
+| `data-ones-submit-form` | `submitForm` | Boolean | `data-ones-submit-form="true"`                                                                |
+| `data-ones-submit-on-outside` | `submitOnOutside` | Boolean | `data-ones-submit-on-outside="true"`                                                          |
+| `data-ones-form-id` | `formId` | String | `data-ones-form-id="myForm"`                                                                  |
+| `data-ones-auto-load` | `autoLoad` | Boolean | `data-ones-auto-load="false"`                                                                 |
+| `data-ones-ajax` | `ajax` | String/Object | `data-ones-ajax="/api/items"` or `data-ones-ajax='{"url": "/api/items","method":"POST"}'`     |
 
 ### Example:
 
@@ -566,11 +568,25 @@ $('#mySelect').oneSelect({
     searchPlaceholder: 'Search items...'
 });
 
+// Search with locale support for case-insensitive search
+$('#mySelect').oneSelect({
+    data: ['İstanbul', 'Isparta', 'Ankara', 'İzmir'],
+    showSearch: true,
+    locale: 'tr-TR'  // Turkish locale for proper İ → i, I → ı mapping
+});
+
 // HTML data attribute example (local search)
 <div class="one-select"
     data-ones-data='["Apple", "Banana", "Cherry", "Mango"]'
     data-ones-show-search="true"
     data-ones-search-placeholder="Find a fruit...">
+</div>
+
+// HTML data attribute example (local search with Turkish locale)
+<div class="one-select"
+    data-ones-data='["İstanbul", "Isparta", "Ankara"]'
+    data-ones-show-search="true"
+    data-ones-locale="tr-TR">
 </div>
 
 // HTML data attribute example (AJAX search)

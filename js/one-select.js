@@ -1,7 +1,7 @@
 /**
  * OneSelect - jQuery Multi-Select Dropdown Plugin
- * Version: 1.2.4
- * https://github.com/your-repo/one-select
+ * Version: 1.3.0
+ * https://github.com/KamranBeylarov/one-select
  *
  * Copyright 2026
  * Licensed under MIT
@@ -95,6 +95,7 @@
         searchPlaceholder: 'Search...',
         searchUrl: null,         // URL for AJAX search (GET request)
         searchDebounceDelay: 300,// Delay in milliseconds for search debounce
+        locale: 'az-AZ',         // Locale for case-insensitive search (e.g., 'en-US', 'tr-TR', 'az-AZ')
         closeOnScroll: false,
         closeOnOutside: true,    // Close dropdown when clicking outside (default: true)
         submitForm: false,
@@ -143,6 +144,7 @@
                 'ones-search-placeholder': 'searchPlaceholder',
                 'ones-search-url': 'searchUrl',
                 'ones-search-debounce-delay': 'searchDebounceDelay',
+                'ones-locale': 'locale',
                 'ones-close-on-scroll': 'closeOnScroll',
                 'ones-close-on-outside': 'closeOnOutside',
                 'ones-submit-form': 'submitForm',
@@ -510,7 +512,10 @@
                 // Filter options by label
                 options.each(function () {
                     var option = $(this);
-                    var label = option.find('label').text().toLowerCase();
+                    // Use configured locale for proper case-insensitive search
+                    // This handles special characters correctly based on locale
+                    // Examples: 'tr-TR' for Turkish, 'az-AZ' for Azerbaijani, 'en-US' for English
+                    var label = option.find('label').text().toLocaleLowerCase(self.settings.locale);
 
                     if (label.indexOf(searchText) !== -1) {
                         option.show();
@@ -613,7 +618,8 @@
                 } else {
                     // Local filtering (default)
                     this.searchInput.find('.cms-search-input').on('keyup', function () {
-                        var searchText = $(this).val().toLowerCase();
+                        // Use configured locale for proper case-insensitive search
+                        var searchText = $(this).val().toLocaleLowerCase(self.settings.locale);
                         self.filterOptions(searchText);
                     });
                 }

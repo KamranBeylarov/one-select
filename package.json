@@ -1,6 +1,6 @@
 {
   "name": "@kamranbaylarov/one-select",
-  "version": "1.2.4",
+  "version": "1.3.0",
   "description": "A powerful, flexible, and feature-rich multi-select dropdown component for jQuery",
   "main": "js/one-select.js",
   "scripts": {
